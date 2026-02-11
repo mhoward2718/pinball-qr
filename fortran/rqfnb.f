@@ -4,6 +4,19 @@ C Output from Public domain Ratfor, version 1.05
       double precision a(p,n),y(n),rhs(p),d(n),u(n),wn(n,9),wp(p,p+3)
       double precision one,beta,eps
       parameter( one = 1.0d0)
+
+Cf2py intent(in) n, p
+Cf2py intent(in,out) a
+Cf2py intent(in,out) y
+Cf2py intent(in,out) rhs
+Cf2py intent(in,out) d
+Cf2py intent(in,out) u
+Cf2py intent(in) beta, eps
+Cf2py intent(in,out) wn
+Cf2py intent(in,out) wp
+Cf2py intent(in,out) nit
+Cf2py intent(in,out) info
+
       call lpfnb(n,p,a,y,rhs,d,u,beta,eps,wn(1,1),wn(1,2), wp(1,1),wn(1,
      *3),wn(1,4),wn(1,5),wn(1,6), wp(1,2),wn(1,7),wn(1,8),wn(1,9),wp(1,3
      *),wp(1,4),nit,info)

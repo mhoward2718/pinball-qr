@@ -17,23 +17,22 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = ['numpy', 'statsmodels', 'scipy']
+requirements = ['numpy', 'statsmodels', 'scipy', 'scikit-learn']
 
 test_requirements = ['pytest>=3']
 
 setup(
     author="Michael Howard",
     author_email='mah38900@gmail.com',
-    python_requires='>=3.6',
+    python_requires='>=3.8',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
     description="The fastest and most accurate method to train quantile regression models in Python",
     entry_points={
