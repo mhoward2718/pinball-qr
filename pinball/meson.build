@@ -17,6 +17,7 @@ py.install_sources(
 # Install subpackages
 subdir('estimators')
 subdir('linear')
+subdir('nonparametric')
 subdir('solvers')
 subdir('util')
 subdir('datasets')
