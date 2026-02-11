@@ -1,5 +1,6 @@
 py = import('python').find_installation(pure: false)
 
+# Backward-compatibility shim modules
 python_sources = [
   '__init__.py',
   'base.py',
@@ -11,5 +12,5 @@ python_sources = [
 
 py.install_sources(
   python_sources,
-  subdir: 'pinball/linear/solvers',
+  subdir: 'pinball/solvers',
 )

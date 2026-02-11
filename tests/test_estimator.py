@@ -55,7 +55,7 @@ class TestQuantileRegressorFit:
         X, y = data
         mock_solver = _make_mock_solver([10.0, 3.0, 5.0])
 
-        with patch("pinball._estimator.get_solver", return_value=mock_solver):
+        with patch("pinball.linear._estimator.get_solver", return_value=mock_solver):
             model = QuantileRegressor(tau=0.5, method="fn")
             result = model.fit(X, y)
             assert result is model
@@ -64,7 +64,7 @@ class TestQuantileRegressorFit:
         X, y = data
         mock_solver = _make_mock_solver([10.0, 3.0, 5.0])
 
-        with patch("pinball._estimator.get_solver", return_value=mock_solver):
+        with patch("pinball.linear._estimator.get_solver", return_value=mock_solver):
             model = QuantileRegressor(tau=0.5).fit(X, y)
 
         assert hasattr(model, "coef_")
@@ -78,7 +78,7 @@ class TestQuantileRegressorFit:
         X, y = data
         mock_solver = _make_mock_solver([10.0, 3.0, 5.0])
 
-        with patch("pinball._estimator.get_solver", return_value=mock_solver):
+        with patch("pinball.linear._estimator.get_solver", return_value=mock_solver):
             model = QuantileRegressor(tau=0.5, fit_intercept=True).fit(X, y)
 
         assert model.intercept_ == 10.0
@@ -88,7 +88,7 @@ class TestQuantileRegressorFit:
         X, y = data
         mock_solver = _make_mock_solver([3.0, 5.0])
 
-        with patch("pinball._estimator.get_solver", return_value=mock_solver):
+        with patch("pinball.linear._estimator.get_solver", return_value=mock_solver):
             model = QuantileRegressor(tau=0.5, fit_intercept=False).fit(X, y)
 
         assert model.intercept_ == 0.0
@@ -115,7 +115,7 @@ class TestQuantileRegressorFit:
             ),
         ]
 
-        with patch("pinball._estimator.get_solver", return_value=mock_solver):
+        with patch("pinball.linear._estimator.get_solver", return_value=mock_solver):
             model = QuantileRegressor(tau=[0.1, 0.5, 0.9]).fit(X, y)
 
         assert model.coef_.shape == (2, 3)
@@ -127,7 +127,7 @@ class TestQuantileRegressorFit:
         mock_solver = _make_mock_solver([10.0, 3.0, 5.0])
         weights = np.ones(len(y))
 
-        with patch("pinball._estimator.get_solver", return_value=mock_solver):
+        with patch("pinball.linear._estimator.get_solver", return_value=mock_solver):
             model = QuantileRegressor().fit(X, y, sample_weight=weights)
 
         # Solver should have been called once
@@ -138,7 +138,7 @@ class TestQuantileRegressorPredict:
 
     def test_predict_shape(self):
         mock_solver = _make_mock_solver([10.0, 3.0, 5.0])
-        with patch("pinball._estimator.get_solver", return_value=mock_solver):
+        with patch("pinball.linear._estimator.get_solver", return_value=mock_solver):
             model = QuantileRegressor().fit(np.random.randn(50, 2), np.random.randn(50))
         pred = model.predict(np.random.randn(10, 2))
         assert pred.shape == (10,)
@@ -152,7 +152,7 @@ class TestQuantileRegressorPredict:
         mock_solver = _make_mock_solver([1.0, 2.0, 3.0])
         X_train = np.random.randn(50, 2)
         y_train = np.random.randn(50)
-        with patch("pinball._estimator.get_solver", return_value=mock_solver):
+        with patch("pinball.linear._estimator.get_solver", return_value=mock_solver):
             model = QuantileRegressor().fit(X_train, y_train)
 
         X_test = np.array([[1.0, 0.0], [0.0, 1.0]])
@@ -167,7 +167,7 @@ class TestQuantileRegressorScore:
         mock_solver = _make_mock_solver([1.0])
         X = np.random.randn(50, 1)
         y = np.random.randn(50)
-        with patch("pinball._estimator.get_solver", return_value=mock_solver):
+        with patch("pinball.linear._estimator.get_solver", return_value=mock_solver):
             model = QuantileRegressor(fit_intercept=False).fit(X, y)
         score = model.score(X, y)
         assert isinstance(score, float)
@@ -178,7 +178,7 @@ class TestQuantileRegressorScore:
         rng = np.random.RandomState(42)
         X = rng.randn(100, 1)
         y = rng.randn(100) + 5  # clearly non-zero mean
-        with patch("pinball._estimator.get_solver", return_value=mock_solver):
+        with patch("pinball.linear._estimator.get_solver", return_value=mock_solver):
             model = QuantileRegressor(fit_intercept=False).fit(X, y)
         score = model.score(X, y)
         assert score < 0

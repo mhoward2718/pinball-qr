@@ -75,14 +75,14 @@ from __future__ import annotations
 from typing import Any, Dict, Optional, Sequence, Union
 
 import numpy as np
-from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.utils.validation import check_is_fitted, validate_data
 
-from pinball.solvers import get_solver
-from pinball.solvers.base import SolverResult
+from pinball.estimators._base import BaseQuantileEstimator
+from pinball.linear.solvers import get_solver
+from pinball.linear.solvers.base import SolverResult
 
 
-class QuantileRegressor(RegressorMixin, BaseEstimator):
+class QuantileRegressor(BaseQuantileEstimator):
     """Quantile regression with an sklearn-compatible interface.
 
     Wraps the high-performance Fortran solvers from the ``quantreg`` tradition
@@ -258,43 +258,7 @@ class QuantileRegressor(RegressorMixin, BaseEstimator):
 
     # score() is inherited from RegressorMixin (returns R²), matching
     # sklearn.linear_model.QuantileRegressor's convention.
-
-    def pinball_loss(self, X, y):
-        """Return the mean pinball (check) loss on ``(X, y)``.
-
-        .. math::
-            \\frac{1}{n}\\sum_i \\rho_\\tau(y_i - \\hat y_i)
-
-        Parameters
-        ----------
-        X : array-like, shape (n_samples, n_features)
-        y : array-like, shape (n_samples,)
-
-        Returns
-        -------
-        float
-        """
-        check_is_fitted(self)
-        y_pred = self.predict(X)
-        taus = np.atleast_1d(self.tau)
-
-        if y_pred.ndim == 1:
-            residuals = y - y_pred
-            loss = np.where(
-                residuals >= 0,
-                taus[0] * residuals,
-                (taus[0] - 1) * residuals,
-            )
-            return float(np.mean(loss))
-        else:
-            y_col = np.asarray(y)[:, np.newaxis]
-            residuals = y_col - y_pred
-            loss = np.where(
-                residuals >= 0,
-                taus[np.newaxis, :] * residuals,
-                (taus[np.newaxis, :] - 1) * residuals,
-            )
-            return float(np.mean(loss))
+    # pinball_loss() is inherited from BaseQuantileEstimator.
 
     # ──────────────────────────────────────────────────────────────────
     # Inference
@@ -324,7 +288,7 @@ class QuantileRegressor(RegressorMixin, BaseEstimator):
         -------
         InferenceResult
         """
-        from pinball._inference import summary as _summary
+        from pinball.linear._inference import summary as _summary
 
         check_is_fitted(self)
         X = validate_data(self, X, dtype=np.float64, reset=False)

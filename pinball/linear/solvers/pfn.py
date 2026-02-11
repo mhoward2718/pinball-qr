@@ -18,8 +18,8 @@ from typing import Any
 
 import numpy as np
 
-from pinball.solvers.base import BaseSolver, SolverResult
-from pinball.solvers.fnb import FNBSolver
+from pinball.linear.solvers.base import BaseSolver, SolverResult
+from pinball.linear.solvers.fnb import FNBSolver
 
 
 class PreprocessingSolver(BaseSolver):

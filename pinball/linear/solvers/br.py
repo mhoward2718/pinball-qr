@@ -24,7 +24,7 @@ from typing import Any, Callable, Optional
 import numpy as np
 from scipy.stats import norm, t as student_t
 
-from pinball.solvers.base import BaseSolver, SolverResult
+from pinball.linear.solvers.base import BaseSolver, SolverResult
 from pinball.util.bandwidth import hall_sheather
 
 

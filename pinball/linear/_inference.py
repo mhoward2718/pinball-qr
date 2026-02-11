@@ -217,7 +217,7 @@ def _se_rank(
     .. [1] Koenker, R. (1994). "Confidence intervals for regression quantiles."
     .. [2] Koenker, R. and Machado, J.A.F. (1999). *JASA* 94(448).
     """
-    from pinball.solvers.br import BRSolver
+    from pinball.linear.solvers.br import BRSolver
 
     n, p = X.shape
 
@@ -388,7 +388,7 @@ def summary(
 
     # Bootstrap: special path — delegates to _bootstrap module
     if se == "boot":
-        from pinball._bootstrap import bootstrap as _boot
+        from pinball.linear._bootstrap import bootstrap as _boot
         nboot = kwargs.get("nboot", 200)
         bsmethod = kwargs.get("method", "xy")
         random_state = kwargs.get("random_state", None)

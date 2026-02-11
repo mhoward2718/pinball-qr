@@ -17,7 +17,7 @@ from typing import Any
 
 import numpy as np
 
-from pinball.solvers.base import BaseSolver, SolverResult
+from pinball.linear.solvers.base import BaseSolver, SolverResult
 
 
 class FNBSolver(BaseSolver):

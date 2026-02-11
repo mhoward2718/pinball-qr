@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from typing import Dict, Type
 
-from pinball.solvers.base import BaseSolver, SolverResult
+from pinball.linear.solvers.base import BaseSolver, SolverResult
 
 __all__ = [
     "BaseSolver",
@@ -90,8 +90,8 @@ def list_solvers() -> list[str]:
 # ──────────────────────────────────────────────────────────────────────
 
 def _register_builtins() -> None:
-    from pinball.solvers.br import BRSolver
-    from pinball.solvers.fnb import FNBSolver
+    from pinball.linear.solvers.br import BRSolver
+    from pinball.linear.solvers.fnb import FNBSolver
 
     register_solver("br", BRSolver)
     register_solver("fn", FNBSolver)
@@ -99,13 +99,13 @@ def _register_builtins() -> None:
 
     # Lazy imports for optional solvers — they depend on FNB internally
     try:
-        from pinball.solvers.lasso import LassoSolver
+        from pinball.linear.solvers.lasso import LassoSolver
         register_solver("lasso", LassoSolver)
     except ImportError:
         pass
 
     try:
-        from pinball.solvers.pfn import PreprocessingSolver
+        from pinball.linear.solvers.pfn import PreprocessingSolver
         register_solver("pfn", PreprocessingSolver)
     except ImportError:
         pass

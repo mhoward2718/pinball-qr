@@ -138,7 +138,7 @@ def _fit_qr(X: np.ndarray, y: np.ndarray, tau: float) -> np.ndarray:
 
     Uses FNB solver for speed; falls back to BR for tiny problems.
     """
-    from pinball.solvers.fnb import FNBSolver
+    from pinball.linear.solvers.fnb import FNBSolver
     solver = FNBSolver()
     return solver.solve(X, y, tau).coefficients
 

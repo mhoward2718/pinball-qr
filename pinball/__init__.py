@@ -16,14 +16,16 @@ __author__ = """Michael Howard"""
 __email__ = "mah38900@gmail.com"
 __version__ = "0.1.0"
 
-from pinball._estimator import QuantileRegressor
-from pinball._inference import summary, InferenceResult
-from pinball._bootstrap import bootstrap, BootstrapResult
+from pinball.linear._estimator import QuantileRegressor
+from pinball.linear._inference import summary, InferenceResult
+from pinball.linear._bootstrap import bootstrap, BootstrapResult
 from pinball.datasets import load_engel
-from pinball.solvers import get_solver, list_solvers, register_solver
-from pinball.solvers.base import BaseSolver, SolverResult
+from pinball.linear.solvers import get_solver, list_solvers, register_solver
+from pinball.linear.solvers.base import BaseSolver, SolverResult
+from pinball.estimators._base import BaseQuantileEstimator
 
 __all__ = [
+    "BaseQuantileEstimator",
     "QuantileRegressor",
     "BaseSolver",
     "SolverResult",

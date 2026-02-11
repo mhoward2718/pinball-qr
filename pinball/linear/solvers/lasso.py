@@ -15,8 +15,8 @@ from typing import Any, Optional
 
 import numpy as np
 
-from pinball.solvers.base import BaseSolver, SolverResult
-from pinball.solvers.fnb import FNBSolver
+from pinball.linear.solvers.base import BaseSolver, SolverResult
+from pinball.linear.solvers.fnb import FNBSolver
 from pinball.util.lambda_selection import lambda_hat_bcv
 
 

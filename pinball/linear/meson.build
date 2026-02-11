@@ -2,14 +2,14 @@ py = import('python').find_installation(pure: false)
 
 python_sources = [
   '__init__.py',
-  'base.py',
-  'br.py',
-  'fnb.py',
-  'lasso.py',
-  'pfn.py',
+  '_estimator.py',
+  '_inference.py',
+  '_bootstrap.py',
 ]
 
 py.install_sources(
   python_sources,
-  subdir: 'pinball/linear/solvers',
+  subdir: 'pinball/linear',
 )
+
+subdir('solvers')
