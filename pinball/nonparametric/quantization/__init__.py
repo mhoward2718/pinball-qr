@@ -11,5 +11,19 @@ References
 """
 
 from pinball.nonparametric.quantization._clvq import choice_grid
+from pinball.nonparametric.quantization._estimator import (
+    QuantizationQuantileEstimator,
+)
+from pinball.nonparametric.quantization._voronoi import (
+    cell_quantiles,
+    predict_quantiles,
+    voronoi_assign,
+)
 
-__all__ = ["choice_grid"]
+__all__ = [
+    "QuantizationQuantileEstimator",
+    "choice_grid",
+    "cell_quantiles",
+    "predict_quantiles",
+    "voronoi_assign",
+]
