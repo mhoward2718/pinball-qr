@@ -22,6 +22,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Fortran",
     "Topic :: Scientific/Engineering :: Mathematics",
     "Topic :: Scientific/Engineering :: Information Analysis",
@@ -37,23 +38,44 @@ keywords = ["quantile regression", "statistics", "machine learning", "econometri
 dev = [
     "pytest>=7",
     "pytest-cov",
-    "black",
-    "flake8",
+    "ruff",
     "mypy",
 ]
 docs = [
-    "sphinx",
-    "sphinx-rtd-theme",
-    "numpydoc",
+    "mkdocs-material>=9",
+    "mkdocstrings[python]>=0.20",
+    "pymdown-extensions>=10",
+    "mkdocs-jupyter>=0.24",
 ]
 
 [project.urls]
 Homepage = "https://github.com/mah38900/pinball"
-Documentation = "https://pinball.readthedocs.io"
+Documentation = "https://mah38900.github.io/pinball/"
 Repository = "https://github.com/mah38900/pinball"
+Issues = "https://github.com/mah38900/pinball/issues"
+Changelog = "https://mah38900.github.io/pinball/changelog/"
 
-[tool.black]
+[tool.ruff]
 line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "SIM",  # flake8-simplify
+]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+    "B905",   # zip without strict=
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["pinball"]
 
 [tool.pytest.ini_options]
 addopts = "-ra -v"

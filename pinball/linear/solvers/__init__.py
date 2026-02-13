@@ -110,5 +110,9 @@ def _register_builtins() -> None:
     except ImportError:
         pass
 
+    # POGS ADMM solver — uses vendored native C++ library
+    from pinball.linear.solvers.pogs import POGSSolver
+    register_solver("pogs", POGSSolver)
+
 
 _register_builtins()

@@ -1,87 +1,72 @@
-.PHONY: clean clean-test clean-pyc clean-build docs help
+.PHONY: clean clean-build clean-pyc clean-test help install dev lint format test coverage docs docs-serve release dist
+
 .DEFAULT_GOAL := help
 
-define BROWSER_PYSCRIPT
-import os, webbrowser, sys
+help: ## Show this help
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-from urllib.request import pathname2url
+# ── Cleaning ──────────────────────────────────────────────────────
 
-webbrowser.open("file://" + pathname2url(os.path.abspath(sys.argv[1])))
-endef
-export BROWSER_PYSCRIPT
+clean: clean-build clean-pyc clean-test ## Remove all build, test, coverage and Python artifacts
 
-define PRINT_HELP_PYSCRIPT
-import re, sys
-
-for line in sys.stdin:
-	match = re.match(r'^([a-zA-Z_-]+):.*?## (.*)$$', line)
-	if match:
-		target, help = match.groups()
-		print("%-20s %s" % (target, help))
-endef
-export PRINT_HELP_PYSCRIPT
-
-BROWSER := python -c "$$BROWSER_PYSCRIPT"
-
-help:
-	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
-
-clean: clean-build clean-pyc clean-test ## remove all build, test, coverage and Python artifacts
-
-clean-build: ## remove build artifacts
+clean-build: ## Remove build artifacts
 	rm -fr build/
 	rm -fr dist/
 	rm -fr .eggs/
+	rm -fr .mesonpy-*
 	find . -name '*.egg-info' -exec rm -fr {} +
 	find . -name '*.egg' -exec rm -f {} +
 
-clean-pyc: ## remove Python file artifacts
+clean-pyc: ## Remove Python file artifacts
 	find . -name '*.pyc' -exec rm -f {} +
 	find . -name '*.pyo' -exec rm -f {} +
 	find . -name '*~' -exec rm -f {} +
 	find . -name '__pycache__' -exec rm -fr {} +
 
-clean-test: ## remove test and coverage artifacts
-	rm -fr .tox/
+clean-test: ## Remove test and coverage artifacts
 	rm -f .coverage
 	rm -fr htmlcov/
 	rm -fr .pytest_cache
 
-lint/flake8: ## check style with flake8
-	flake8 pinball tests
+# ── Installation ──────────────────────────────────────────────────
 
-lint: lint/flake8 ## check style
+install: ## Install package (editable, with build isolation disabled)
+	pip install -e . --no-build-isolation
 
-test: ## run tests quickly with the default Python
+dev: ## Install package with all dev + docs dependencies
+	pip install -e ".[dev,docs]" --no-build-isolation
+
+# ── Quality ───────────────────────────────────────────────────────
+
+lint: ## Check code style with ruff
+	ruff check pinball tests
+
+format: ## Auto-format code with ruff
+	ruff format pinball tests
+	ruff check --fix pinball tests
+
+# ── Testing ───────────────────────────────────────────────────────
+
+test: ## Run tests
 	pytest
 
-test-all: ## run tests on every Python version with tox
-	tox
+coverage: ## Run tests with coverage
+	pytest --cov=pinball --cov-report=term-missing --cov-report=html
+	@echo "Open htmlcov/index.html to view the report"
 
-coverage: ## check code coverage quickly with the default Python
-	coverage run --source pinball -m pytest
-	coverage report -m
-	coverage html
-	$(BROWSER) htmlcov/index.html
+# ── Documentation ─────────────────────────────────────────────────
 
-docs: ## generate Sphinx HTML documentation, including API docs
-	rm -f docs/pinball.rst
-	rm -f docs/modules.rst
-	sphinx-apidoc -o docs/ pinball
-	$(MAKE) -C docs clean
-	$(MAKE) -C docs html
-	$(BROWSER) docs/_build/html/index.html
+docs: ## Build documentation with MkDocs
+	mkdocs build
 
-servedocs: docs ## compile the docs watching for changes
-	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
+docs-serve: ## Serve documentation locally with live reload
+	mkdocs serve
 
-release: dist ## package and upload a release
-	twine upload dist/*
+# ── Distribution ──────────────────────────────────────────────────
 
-dist: clean ## builds source and wheel package
-	python setup.py sdist
-	python setup.py bdist_wheel
+dist: clean ## Build source and wheel distributions
+	python -m build
 	ls -l dist
 
-install: clean ## install the package to the active Python's site-packages
-	python setup.py install
+release: dist ## Upload to PyPI (requires twine)
+	twine upload dist/*

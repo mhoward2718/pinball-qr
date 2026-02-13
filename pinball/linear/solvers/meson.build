@@ -7,6 +7,7 @@ python_sources = [
   'fnb.py',
   'lasso.py',
   'pfn.py',
+  'pogs.py',
 ]
 
 py.install_sources(

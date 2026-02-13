@@ -1,0 +1,43 @@
+# ── Build artifacts ────────────────────────────────────────────────
+build/
+dist/
+.eggs/
+*.egg-info/
+*.egg
+.mesonpy-*/
+
+# ── Python bytecode ───────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ── Compiled extensions ──────────────────────────────────────────
+*.so
+*.dylib
+*.dll
+
+# ── Testing / Coverage ───────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ── Type checking ────────────────────────────────────────────────
+.mypy_cache/
+
+# ── Documentation ────────────────────────────────────────────────
+site/
+
+# ── Editors / IDEs ───────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── OS files ─────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Virtual environments ─────────────────────────────────────────
+.venv/
+venv/
