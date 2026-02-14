@@ -39,18 +39,22 @@ if (-not $dll) {
 }
 Write-Host "Found DLL at: $($dll.FullName)"
 
-# Copy DLL to bin/ (for PATH / runtime) and to lib/ (for linker)
+# Copy DLL to bin/ (for PATH / runtime) and to lib/ (for linker), skipping self-copies
 New-Item -ItemType Directory -Force -Path $binDir | Out-Null
-Copy-Item $dll.FullName (Join-Path $binDir 'libopenblas.dll') -Force
-Copy-Item $dll.FullName (Join-Path $libDir 'libopenblas.dll') -Force
+$binDest = Join-Path $binDir 'libopenblas.dll'
+$libDest = Join-Path $libDir 'libopenblas.dll'
+if ($dll.FullName -ne (Resolve-Path $binDest -ErrorAction SilentlyContinue)) {
+    Copy-Item $dll.FullName $binDest -Force
+}
+if ($dll.FullName -ne (Resolve-Path $libDest -ErrorAction SilentlyContinue)) {
+    Copy-Item $dll.FullName $libDest -Force
+}
 
 # 6. Generate MinGW import library (.dll.a) from the DLL
 #    The pre-built OpenBLAS zip does not include a MinGW import library,
 #    only the bare DLL.  We generate one with gendef + dlltool.
 Write-Host '--- Generating MinGW import library ---'
 Push-Location $INSTALL_DIR
-$dllFile = Join-Path $INSTALL_DIR 'libopenblas.dll'
-Copy-Item $dll.FullName $dllFile -Force
 
 # gendef creates a .def file listing all exported symbols
 & gendef libopenblas.dll
