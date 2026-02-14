@@ -78,7 +78,7 @@ ignore = [
 known-first-party = ["pinball"]
 
 [tool.pytest.ini_options]
-addopts = "-ra -v"
+addopts = "-ra -v --import-mode=importlib"
 testpaths = ["tests"]
 
 [tool.mypy]
