@@ -46,8 +46,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-14, windows-latest]
-        # macos-14 = arm64
+        # TODO: restore [ubuntu-latest, macos-14, windows-latest] once Linux works
+        os: [ubuntu-latest]
 
     steps:
       - uses: actions/checkout@v4
@@ -95,24 +95,25 @@ jobs:
         # Uses trusted publishing — no token needed if configured on PyPI
 
   # ── (Optional) Publish to TestPyPI on main push ───────────────
-  publish_test:
-    name: Publish to TestPyPI
-    needs: [build_sdist, build_wheels]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    environment:
-      name: testpypi
-      url: https://test.pypi.org/p/pinball-qr
-    permissions:
-      id-token: write
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          path: dist
-          merge-multiple: true
+  # Disabled until build pipeline is stable
+  # publish_test:
+  #   name: Publish to TestPyPI
+  #   needs: [build_sdist, build_wheels]
+  #   runs-on: ubuntu-latest
+  #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  #   environment:
+  #     name: testpypi
+  #     url: https://test.pypi.org/p/pinball-qr
+  #   permissions:
+  #     id-token: write
+  #   steps:
+  #     - uses: actions/download-artifact@v4
+  #       with:
+  #         path: dist
+  #         merge-multiple: true
 
-      - name: Publish to TestPyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
-          skip-existing: true
+  #     - name: Publish to TestPyPI
+  #       uses: pypa/gh-action-pypi-publish@release/v1
+  #       with:
+  #         repository-url: https://test.pypi.org/legacy/
+  #         skip-existing: true

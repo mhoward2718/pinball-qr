@@ -6,6 +6,14 @@ import pytest
 from pinball._inference import summary, InferenceResult, _se_iid, _se_nid
 
 
+def _has_native():
+    try:
+        import pinball._native  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
 class TestInferenceResult:
 
     def test_repr(self):
@@ -46,6 +54,7 @@ class TestSummary:
         assert isinstance(result, InferenceResult)
         assert result.se_method == "nid"
 
+    @pytest.mark.skipif(not _has_native(), reason="Fortran extension not built")
     def test_auto_selects_rank_for_small_n(self, problem):
         X, y, coef = problem
         # n=200 < 1001 → auto should select "rank" (falls back to nid for now)
