@@ -33,10 +33,16 @@ elif host_machine.system() == 'windows'
   # OpenBLAS bundles LAPACK, so one dependency covers both.
   blas_lapack = [dependency('openblas', required: true)]
 else
-  blas_lapack = [
-    dependency('blas', required: true),
-    dependency('lapack', required: true),
-  ]
+  # Try OpenBLAS first (what manylinux / yum provides), then generic blas+lapack.
+  _openblas = dependency('openblas', required: false)
+  if _openblas.found()
+    blas_lapack = [_openblas]
+  else
+    blas_lapack = [
+      dependency('blas', required: true),
+      dependency('lapack', required: true),
+    ]
+  endif
 endif
 
 # Generate the f2py wrapper C source

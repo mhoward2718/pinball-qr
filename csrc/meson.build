@@ -35,10 +35,16 @@ if host_machine.system() == 'darwin'
 elif host_machine.system() == 'windows'
   blas_lapack = [dependency('openblas', required: true)]
 else
-  blas_lapack = [
-    dependency('blas', required: true),
-    dependency('lapack', required: true),
-  ]
+  # Try OpenBLAS first (what manylinux / yum provides), then generic blas+lapack.
+  _openblas = dependency('openblas', required: false)
+  if _openblas.found()
+    blas_lapack = [_openblas]
+  else
+    blas_lapack = [
+      dependency('blas', required: true),
+      dependency('lapack', required: true),
+    ]
+  endif
 endif
 
 # ── Build shared library ──────────────────────────────────
