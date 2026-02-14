@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from pinball.solvers.base import BaseSolver, SolverResult
+from pinball.linear.solvers.base import BaseSolver, SolverResult
 
 
 # ──────────────────────────────────────────────────────────────────────

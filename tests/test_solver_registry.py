@@ -2,8 +2,8 @@
 
 import pytest
 
-from pinball.solvers import get_solver, list_solvers, register_solver
-from pinball.solvers.base import BaseSolver, SolverResult
+from pinball.linear.solvers import get_solver, list_solvers, register_solver
+from pinball.linear.solvers.base import BaseSolver, SolverResult
 
 
 class _DummySolver(BaseSolver):

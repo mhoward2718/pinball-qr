@@ -10,8 +10,8 @@ import numpy as np
 import pytest
 from unittest.mock import patch, MagicMock
 
-from pinball.solvers.br import BRSolver, _derive_br_params, _get_wls_weights
-from pinball.solvers.base import SolverResult
+from pinball.linear.solvers.br import BRSolver, _derive_br_params, _get_wls_weights
+from pinball.linear.solvers.base import SolverResult
 
 
 # ──────────────────────────────────────────────────────────────────────
@@ -102,10 +102,10 @@ class TestBRSolver:
         X, y = data
         n, p = X.shape
         solver = BRSolver()
-        with patch("pinball.solvers.br.rqbr", create=True) as mock:
+        with patch("pinball.linear.solvers.br.rqbr", create=True) as mock:
             mock.return_value = self._mock_rqbr_return(n, p)
             with patch.dict("sys.modules", {"pinball._native": MagicMock(rqbr=mock)}):
-                with patch("pinball.solvers.br.BRSolver._solve_impl") as mock_impl:
+                with patch("pinball.linear.solvers.br.BRSolver._solve_impl") as mock_impl:
                     # Direct mock of the implementation
                     mock_impl.return_value = SolverResult(
                         coefficients=np.array([1.0, 2.0, 3.0]),
@@ -142,7 +142,7 @@ class TestGetWLSWeights:
             SolverResult(coefficients=np.array([0.3, 0.4]), residuals=y * 0),
         ]
 
-        with patch("pinball.solvers.br.BRSolver", return_value=solver_mock):
+        with patch("pinball.linear.solvers.br.BRSolver", return_value=solver_mock):
             weights = _get_wls_weights(X, y, tau=0.5)
 
         assert np.all(weights > 0)
@@ -159,7 +159,7 @@ class TestGetWLSWeights:
         ]
         eps = np.finfo(np.float64).eps ** (2.0 / 3.0)
 
-        with patch("pinball.solvers.br.BRSolver", return_value=solver_mock):
+        with patch("pinball.linear.solvers.br.BRSolver", return_value=solver_mock):
             weights = _get_wls_weights(X, y, tau=0.5)
 
         # When dyhat is zero, weights should be at least eps

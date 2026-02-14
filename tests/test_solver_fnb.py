@@ -4,8 +4,8 @@ import numpy as np
 import pytest
 from unittest.mock import MagicMock, patch
 
-from pinball.solvers.fnb import FNBSolver
-from pinball.solvers.base import SolverResult
+from pinball.linear.solvers.fnb import FNBSolver
+from pinball.linear.solvers.base import SolverResult
 
 
 class TestFNBSolver:

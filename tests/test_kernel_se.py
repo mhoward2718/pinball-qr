@@ -22,7 +22,7 @@ def engel_fitted():
     n = data.data.shape[0]
     X = np.column_stack([np.ones(n), data.data[:, 0]])
     y = data.target
-    from pinball.solvers.fnb import FNBSolver
+    from pinball.linear.solvers.fnb import FNBSolver
     solver = FNBSolver()
     result = solver.solve(X, y, 0.5)
     return X, y, result.coefficients

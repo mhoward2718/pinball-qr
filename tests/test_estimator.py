@@ -5,7 +5,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 
 from pinball._estimator import QuantileRegressor
-from pinball.solvers.base import SolverResult
+from pinball.linear.solvers.base import SolverResult
 
 
 # ──────────────────────────────────────────────────────────────────────

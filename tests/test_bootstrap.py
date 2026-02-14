@@ -229,7 +229,7 @@ class TestBootstrapSummaryIntegration:
         """summary(se='boot') should use bootstrap for SE estimation."""
         from pinball._inference import summary, InferenceResult
         X, y, _ = synthetic_problem
-        from pinball.solvers.fnb import FNBSolver
+        from pinball.linear.solvers.fnb import FNBSolver
         coef = FNBSolver().solve(X, y, 0.5).coefficients
         result = summary(X, y, coef, tau=0.5, se="boot", alpha=0.05, nboot=50)
         assert isinstance(result, InferenceResult)

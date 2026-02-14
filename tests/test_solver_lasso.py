@@ -4,8 +4,8 @@ import numpy as np
 import pytest
 from unittest.mock import MagicMock, patch
 
-from pinball.solvers.lasso import LassoSolver
-from pinball.solvers.base import SolverResult
+from pinball.linear.solvers.lasso import LassoSolver
+from pinball.linear.solvers.base import SolverResult
 
 
 class TestLassoSolverInit:

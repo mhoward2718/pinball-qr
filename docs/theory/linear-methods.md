@@ -257,7 +257,7 @@ All solvers are registered in a global dictionary and can be listed
 programmatically:
 
 ```python
-from pinball.solvers import list_solvers, get_solver
+from pinball.linear.solvers import list_solvers, get_solver
 
 # See available methods
 print(list_solvers())
@@ -271,7 +271,7 @@ result = solver.solve(X, y, tau=0.5)
 Custom solvers can be registered with `register_solver()`:
 
 ```python
-from pinball.solvers import register_solver, BaseSolver
+from pinball.linear.solvers import register_solver, BaseSolver
 
 class MySolver(BaseSolver):
     def _solve_impl(self, X, y, tau, **kwargs):

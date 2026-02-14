@@ -97,7 +97,7 @@ class QuantileRegressor(BaseQuantileEstimator):
         ``coef_`` with shape ``(n_features_in_, n_quantiles)``.
     method : str, default="fn"
         Solver back-end.  One of ``"br"``, ``"fn"`` / ``"fnb"``,
-        ``"lasso"``, ``"pfn"``.  See :func:`pinball.solvers.list_solvers`.
+        ``"lasso"``, ``"pfn"``.  See :func:`pinball.linear.solvers.list_solvers`.
     fit_intercept : bool, default=True
         Whether to add an intercept column to *X* automatically.
     solver_options : dict or None

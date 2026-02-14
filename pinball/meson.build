@@ -18,6 +18,5 @@ py.install_sources(
 subdir('estimators')
 subdir('linear')
 subdir('nonparametric')
-subdir('solvers')
 subdir('util')
 subdir('datasets')

@@ -28,7 +28,7 @@ def engel_problem():
     X = np.column_stack([np.ones(n), data.data[:, 0]])  # intercept + income
     y = data.target
     # Fit at median with BR solver
-    from pinball.solvers.br import BRSolver
+    from pinball.linear.solvers.br import BRSolver
     solver = BRSolver(ci=True, iid=True, alpha=0.05)
     result = solver.solve(X, y, 0.5)
     return X, y, result
@@ -112,7 +112,7 @@ class TestRankInversionCI:
     def test_nid_variant(self, small_problem):
         """Rank CIs with iid=False (NID variant)."""
         X, y, beta_true = small_problem
-        from pinball.solvers.br import BRSolver
+        from pinball.linear.solvers.br import BRSolver
         solver = BRSolver(ci=True, iid=False, alpha=0.05)
         res = solver.solve(X, y, 0.5)
         result = summary(X, y, res.coefficients, tau=0.5, se="rank")

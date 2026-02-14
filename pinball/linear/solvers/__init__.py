@@ -5,7 +5,7 @@ means calling :func:`register_solver`; no existing code needs to change.
 
 Usage
 -----
->>> from pinball.solvers import get_solver
+>>> from pinball.linear.solvers import get_solver
 >>> solver = get_solver("fn")      # returns an FNBSolver instance
 >>> result = solver.solve(X, y, tau=0.5)
 """

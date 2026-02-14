@@ -4,8 +4,8 @@ import numpy as np
 import pytest
 from unittest.mock import MagicMock
 
-from pinball.solvers.pfn import PreprocessingSolver
-from pinball.solvers.base import BaseSolver, SolverResult
+from pinball.linear.solvers.pfn import PreprocessingSolver
+from pinball.linear.solvers.base import BaseSolver, SolverResult
 
 
 class _FakeInnerSolver(BaseSolver):
