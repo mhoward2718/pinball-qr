@@ -47,7 +47,7 @@ _pogs_native = shared_library(
   [pogs_sources, adapter_sources],
   include_directories: pogs_inc,
   dependencies: blas_lapack,
-  cpp_args: ['-std=c++20', '-DQR_POGS_BUILDING'],
+  cpp_args: ['-std=c++20', '-DQR_POGS_BUILDING', '-DPOGS_BUILDING_SHARED'],
   install: true,
   install_dir: py.get_install_dir() / 'pinball',
 )
