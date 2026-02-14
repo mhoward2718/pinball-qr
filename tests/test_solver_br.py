@@ -173,8 +173,11 @@ class TestGetWLSWeights:
 # ──────────────────────────────────────────────────────────────────────
 
 def _has_native():
-    import importlib.util
-    return importlib.util.find_spec("pinball._native") is not None
+    try:
+        from pinball._native import rqbr  # noqa: F401
+        return True
+    except Exception:
+        return False
 
 
 @pytest.mark.skipif(not _has_native(), reason="Fortran extension not built")

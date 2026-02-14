@@ -178,7 +178,12 @@ def _get_lib() -> ctypes.CDLL:
     global _lib
     if _lib is None:
         lib_path = _find_native_library()
-        _lib = ctypes.CDLL(str(lib_path))
+        # winmode=0 restores legacy PATH-based DLL search on Windows
+        # so that runtime dependencies (OpenBLAS, MinGW) are found.
+        kwargs: dict = {}
+        if sys.platform == "win32":
+            kwargs["winmode"] = 0
+        _lib = ctypes.CDLL(str(lib_path), **kwargs)
 
         # Declare the C signature for qr_pogs_solve
         _lib.qr_pogs_solve.restype = ctypes.c_int
