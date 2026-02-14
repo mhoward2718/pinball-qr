@@ -24,7 +24,7 @@
 #include <vector>
 
 extern "C"
-int qr_pogs_solve(
+QR_POGS_API int qr_pogs_solve(
     size_t m, size_t n,
     const double *A, const double *y,
     double tau,
