@@ -100,7 +100,7 @@ before-build = "pip install meson meson-python numpy"
 
 [tool.cibuildwheel.macos]
 archs = ["native"]
-before-all = "brew install gcc && ln -sf $(brew --prefix)/bin/gfortran-* $(brew --prefix)/bin/gfortran"
+before-all = "brew install gcc && GFORTRAN=$(ls $(brew --prefix)/bin/gfortran-[0-9]* 2>/dev/null | head -1) && [ -n \"$GFORTRAN\" ] && ln -sf \"$GFORTRAN\" $(brew --prefix)/bin/gfortran"
 before-build = "pip install meson meson-python numpy"
 
 [tool.cibuildwheel.windows]

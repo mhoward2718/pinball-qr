@@ -68,7 +68,8 @@ jobs:
         run: |
           brew install gcc
           # Homebrew installs gfortran-{major} only; create unversioned symlink
-          ln -sf $(brew --prefix)/bin/gfortran-* $(brew --prefix)/bin/gfortran
+          GFORTRAN=$(ls $(brew --prefix)/bin/gfortran-[0-9]* 2>/dev/null | head -1)
+          [ -n "$GFORTRAN" ] && ln -sf "$GFORTRAN" $(brew --prefix)/bin/gfortran
 
       - name: Install Fortran compiler (Windows)
         if: runner.os == 'Windows'
