@@ -94,14 +94,15 @@ test-requires = ["pytest", "scipy", "scikit-learn"]
 test-command = "python -m pytest {project}/tests -x --tb=short"
 
 [tool.cibuildwheel.linux]
-archs = ["x86_64", "aarch64"]
-before-all = [
-  "yum install -y gcc-gfortran openblas-devel lapack-devel || apk add gfortran openblas-dev lapack-dev || (apt-get update && apt-get install -y gfortran libopenblas-dev)",
-]
+archs = ["x86_64"]
+before-all = "yum install -y gcc-gfortran openblas-devel lapack-devel"
+before-build = "pip install meson meson-python numpy"
 
 [tool.cibuildwheel.macos]
 archs = ["native"]
-before-all = ["brew install gcc"]
+before-all = "brew install gcc && ln -sf $(brew --prefix)/bin/gfortran-* $(brew --prefix)/bin/gfortran"
+before-build = "pip install meson meson-python numpy"
 
 [tool.cibuildwheel.windows]
 archs = ["AMD64"]
+before-build = "pip install meson meson-python numpy"

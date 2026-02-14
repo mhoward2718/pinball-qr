@@ -19,7 +19,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install dependencies
-        run: pip install mkdocs-material mkdocs-jupyter
+        run: pip install mkdocs-material "mkdocstrings[python]" pymdown-extensions mkdocs-jupyter
 
       - name: Build and deploy
         run: mkdocs gh-deploy --force

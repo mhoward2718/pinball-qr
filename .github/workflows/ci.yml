@@ -65,7 +65,10 @@ jobs:
 
       - name: Install Fortran compiler (macOS)
         if: runner.os == 'macOS'
-        run: brew install gcc
+        run: |
+          brew install gcc
+          # Homebrew installs gfortran-{major} only; create unversioned symlink
+          ln -sf $(brew --prefix)/bin/gfortran-* $(brew --prefix)/bin/gfortran
 
       - name: Install Fortran compiler (Windows)
         if: runner.os == 'Windows'
