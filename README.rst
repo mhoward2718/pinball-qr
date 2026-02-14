@@ -12,9 +12,7 @@ Pinball-QR
 .. image:: docs/pinball_logo.png
 
 
-Fast and accurate quantile regression for Python, with an sklearn-compatible
-interface. Pinball-QR provides high-performance linear and nonparametric
-quantile regression backed by compiled Fortran and C++ solvers.
+The fastest and most accurate methods for quantile regression, now in python.
 
 * Free software: MIT license
 * Documentation: https://mhoward2718.github.io/pinball-qr/
