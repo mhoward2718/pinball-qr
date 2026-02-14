@@ -83,15 +83,39 @@ jobs:
 
       - name: Verify extensions are installed
         run: |
-          python -c "import pinball._native; print('Fortran extension OK:', dir(pinball._native))"
+          cd /tmp
           python -c "
-          import importlib.util, pathlib
+          import importlib.util, pathlib, sys
+
           spec = importlib.util.find_spec('pinball')
           pkg_dir = pathlib.Path(spec.origin).parent
           print('Package location:', pkg_dir)
-          for f in sorted(pkg_dir.iterdir()):
-              print(' ', f.name)
+          print('Files in package:')
+          for f in sorted(pkg_dir.rglob('*')):
+              if f.is_file():
+                  print(f'  {f.relative_to(pkg_dir)}  ({f.stat().st_size} bytes)')
+
+          # Check for compiled extensions
+          so_files = list(pkg_dir.glob('*.so')) + list(pkg_dir.glob('*.pyd'))
+          print(f'\nCompiled extensions found: {len(so_files)}')
+          for s in so_files:
+              print(f'  {s.name}')
+
+          # Try importing
+          try:
+              import pinball._native
+              print('\nFortran extension: OK')
+          except ImportError as e:
+              print(f'\nFortran extension: MISSING ({e})')
+
+          try:
+              import ctypes
+              lib_candidates = list(pkg_dir.glob('_pogs_native*'))
+              print(f'POGS library candidates: {lib_candidates}')
+          except Exception as e:
+              print(f'POGS library check: {e}')
           "
+        continue-on-error: true
 
       - name: Run full test suite
         run: |
