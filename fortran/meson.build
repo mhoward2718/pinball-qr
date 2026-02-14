@@ -25,6 +25,16 @@ incdir_f2py = run_command(
 # f2py runtime source — defines _PyFortran_Type and other symbols
 f2py_source = incdir_f2py / 'fortranobject.c'
 
+# ── BLAS / LAPACK (needed by rqfn, rqfnb, rqbr — they call dswap, dgemv, …) ──
+if host_machine.system() == 'darwin'
+  blas_lapack = [dependency('Accelerate', required: true)]
+else
+  blas_lapack = [
+    dependency('blas', required: true),
+    dependency('lapack', required: true),
+  ]
+endif
+
 # Generate the f2py wrapper C source
 f2py_gen = custom_target(
   '_nativemodule',
@@ -39,6 +49,7 @@ py.extension_module(
   '_native',
   [f2py_gen, fortran_sources, f2py_source],
   include_directories: [incdir_numpy, incdir_f2py],
+  dependencies: blas_lapack,
   install: true,
   subdir: 'pinball',
 )
