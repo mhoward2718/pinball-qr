@@ -41,3 +41,8 @@ Thumbs.db
 # ── Virtual environments ─────────────────────────────────────────
 .venv/
 venv/
+
+# ── Legacy / obsolete ────────────────────────────────────────────
+setup.py
+.travis.yml
+quantreg.pdf
