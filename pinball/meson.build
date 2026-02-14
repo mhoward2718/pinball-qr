@@ -4,6 +4,7 @@ py = import('python').find_installation(pure: false)
 python_sources = [
   '__init__.py',
   '_bootstrap.py',
+  '_dll_setup.py',
   '_estimator.py',
   '_inference.py',
   '_typing.py',
