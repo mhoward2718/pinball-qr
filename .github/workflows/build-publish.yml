@@ -46,8 +46,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # TODO: restore [ubuntu-latest, macos-14, windows-latest] once Linux works
-        os: [ubuntu-latest]
+        include:
+          - os: ubuntu-latest
+          - os: macos-14       # Apple Silicon (arm64)
+          - os: macos-15-intel # Intel (x86_64) — free for public repos
+          # TODO: add windows-latest once Windows build is working
 
     steps:
       - uses: actions/checkout@v4
