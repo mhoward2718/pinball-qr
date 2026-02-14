@@ -46,7 +46,7 @@ This project builds on the work of several researchers and open-source projects:
     *Quantile Regression*, Cambridge University Press.
 
 **POGS** (Proximal Operator Graph Solver)
-    The ADMM-based solver uses vendored C++ source from
+    The ADMM-based solver uses C++ source from
     `POGS <https://github.com/foges/pogs>`_ by **Christopher Fougner**
     (MIT license). See Fougner & Boyd (2018), *Parameter Selection and
     Pre-Conditioning for a Graph Form Solver*, in Emerging Applications of
