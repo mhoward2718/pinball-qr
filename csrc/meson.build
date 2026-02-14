@@ -29,8 +29,11 @@ pogs_inc = include_directories(
 # ── BLAS / LAPACK ──────────────────────────────────────────────────
 # On macOS, use the Accelerate framework (always available, no MKL needed).
 # On Linux, fall back to pkg-config / cmake discovery.
+# On Windows, CI installs OpenBLAS and sets PKG_CONFIG_PATH.
 if host_machine.system() == 'darwin'
   blas_lapack = [dependency('Accelerate', required: true)]
+elif host_machine.system() == 'windows'
+  blas_lapack = [dependency('openblas', required: true)]
 else
   blas_lapack = [
     dependency('blas', required: true),

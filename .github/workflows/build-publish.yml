@@ -50,7 +50,7 @@ jobs:
           - os: ubuntu-latest
           - os: macos-14       # Apple Silicon (arm64)
           - os: macos-15-intel # Intel (x86_64) — free for public repos
-          # TODO: add windows-latest once Windows build is working
+          - os: windows-latest # Windows x86_64
 
     steps:
       - uses: actions/checkout@v4

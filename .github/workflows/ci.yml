@@ -77,14 +77,23 @@ jobs:
         with:
           compiler: gcc
 
+      - name: Install BLAS/LAPACK (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          & "${{ github.workspace }}/.github/scripts/install-openblas-win.ps1"
+          echo "PKG_CONFIG_PATH=C:/openblas/lib/pkgconfig" >> $env:GITHUB_ENV
+          echo "C:\openblas\bin" >> $env:GITHUB_PATH
+
       - name: Build and install package (compiles Fortran & C++)
         run: |
           pip install --upgrade pip
           pip install .[dev]
 
       - name: Verify extensions are installed
+        shell: bash
         run: |
-          cd /tmp
+          cd "$RUNNER_TEMP"
           python -c "
           import importlib.util, pathlib, sys
 
@@ -119,8 +128,9 @@ jobs:
         continue-on-error: true
 
       - name: Run full test suite
+        shell: bash
         run: |
-          # Run from /tmp so Python imports the *installed* package (with
-          # compiled extensions) rather than the local pinball/ source tree.
-          cd /tmp
+          # Run from a temp dir so Python imports the *installed* package
+          # (with compiled extensions) rather than the local source tree.
+          cd "$RUNNER_TEMP"
           python -m pytest "$GITHUB_WORKSPACE/tests/" -v --tb=short

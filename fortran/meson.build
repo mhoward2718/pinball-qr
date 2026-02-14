@@ -28,6 +28,10 @@ f2py_source = incdir_f2py / 'fortranobject.c'
 # ── BLAS / LAPACK (needed by rqfn, rqfnb, rqbr — they call dswap, dgemv, …) ──
 if host_machine.system() == 'darwin'
   blas_lapack = [dependency('Accelerate', required: true)]
+elif host_machine.system() == 'windows'
+  # On Windows, CI installs OpenBLAS and sets PKG_CONFIG_PATH.
+  # OpenBLAS bundles LAPACK, so one dependency covers both.
+  blas_lapack = [dependency('openblas', required: true)]
 else
   blas_lapack = [
     dependency('blas', required: true),

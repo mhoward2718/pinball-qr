@@ -105,4 +105,9 @@ before-build = "pip install meson meson-python numpy"
 
 [tool.cibuildwheel.windows]
 archs = ["AMD64"]
-before-build = "pip install meson meson-python numpy"
+before-all = "powershell -ExecutionPolicy Bypass -File \"{project}\\.github\\scripts\\install-openblas-win.ps1\""
+before-build = "pip install meson meson-python numpy delvewheel"
+repair-wheel-command = "delvewheel repair --add-path C:/openblas/bin -w {dest_dir} {wheel}"
+
+[tool.cibuildwheel.windows.environment]
+PKG_CONFIG_PATH = "C:/openblas/lib/pkgconfig"
