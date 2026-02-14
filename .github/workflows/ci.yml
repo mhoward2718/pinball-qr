@@ -82,4 +82,8 @@ jobs:
           pip install .[dev]
 
       - name: Run full test suite
-        run: python -m pytest tests/ -v --tb=short
+        run: |
+          # Run from /tmp so Python imports the *installed* package (with
+          # compiled extensions) rather than the local pinball/ source tree.
+          cd /tmp
+          python -m pytest "$GITHUB_WORKSPACE/tests/" -v --tb=short
