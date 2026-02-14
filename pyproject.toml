@@ -3,7 +3,7 @@ requires = ["meson-python>=0.13.0", "numpy>=1.23", "meson>=1.1.0"]
 build-backend = "mesonpy"
 
 [project]
-name = "pinball"
+name = "pinball-qr"
 version = "0.1.0"
 description = "Fast and accurate quantile regression for Python, with an sklearn-compatible interface."
 readme = "README.rst"
@@ -49,11 +49,11 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/mah38900/pinball"
-Documentation = "https://mah38900.github.io/pinball/"
-Repository = "https://github.com/mah38900/pinball"
-Issues = "https://github.com/mah38900/pinball/issues"
-Changelog = "https://mah38900.github.io/pinball/changelog/"
+Homepage = "https://github.com/mhoward2718/pinball-qr"
+Documentation = "https://mhoward2718.github.io/pinball-qr/"
+Repository = "https://github.com/mhoward2718/pinball-qr"
+Issues = "https://github.com/mhoward2718/pinball-qr/issues"
+Changelog = "https://mhoward2718.github.io/pinball-qr/changelog/"
 
 [tool.ruff]
 line-length = 100
@@ -85,3 +85,23 @@ testpaths = ["tests"]
 python_version = "3.9"
 warn_return_any = true
 warn_unused_configs = true
+
+# ── cibuildwheel ────────────────────────────────────────────
+[tool.cibuildwheel]
+build = "cp39-* cp310-* cp311-* cp312-* cp313-*"
+skip = "*-win32 *-manylinux_i686 *-musllinux*"
+test-requires = ["pytest", "scipy", "scikit-learn"]
+test-command = "python -m pytest {project}/tests -x --tb=short"
+
+[tool.cibuildwheel.linux]
+archs = ["x86_64", "aarch64"]
+before-all = [
+  "yum install -y gcc-gfortran openblas-devel lapack-devel || apk add gfortran openblas-dev lapack-dev || (apt-get update && apt-get install -y gfortran libopenblas-dev)",
+]
+
+[tool.cibuildwheel.macos]
+archs = ["native"]
+before-all = ["brew install gcc"]
+
+[tool.cibuildwheel.windows]
+archs = ["AMD64"]

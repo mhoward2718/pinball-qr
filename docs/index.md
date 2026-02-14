@@ -6,7 +6,7 @@
   <img src="assets/pinball_logo.png" alt="Pinball logo" width="200"/>
 </p>
 
-[![PyPI](https://img.shields.io/pypi/v/pinball.svg)](https://pypi.org/project/pinball/)
+[![PyPI](https://img.shields.io/pypi/v/pinball-qr.svg)](https://pypi.org/project/pinball-qr/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![sklearn](https://img.shields.io/badge/sklearn-compatible-blue.svg)](https://scikit-learn.org/)
 

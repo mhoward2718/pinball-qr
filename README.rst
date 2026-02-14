@@ -1,16 +1,16 @@
-========
-Pinball
-========
+===========
+Pinball-QR
+===========
 
 
-.. image:: https://img.shields.io/pypi/v/pinball.svg
-        :target: https://pypi.python.org/pypi/pinball
+.. image:: https://img.shields.io/pypi/v/pinball-qr.svg
+        :target: https://pypi.python.org/pypi/pinball-qr
 
-.. image:: https://img.shields.io/travis/mah38900/pinball.svg
-        :target: https://travis-ci.com/mah38900/pinball
+.. image:: https://img.shields.io/travis/mhoward2718/pinball-qr.svg
+        :target: https://travis-ci.com/mhoward2718/pinball-qr
 
-.. image:: https://readthedocs.org/projects/pinball/badge/?version=latest
-        :target: https://pinball.readthedocs.io/en/latest/?version=latest
+.. image:: https://readthedocs.org/projects/pinball-qr/badge/?version=latest
+        :target: https://pinball-qr.readthedocs.io/en/latest/?version=latest
         :alt: Documentation Status
 
 
@@ -23,7 +23,7 @@ The fastest and most accurate method to train quantile regression models in Pyth
 
 
 * Free software: MIT license
-* Documentation: https://pinball.readthedocs.io.
+* Documentation: https://pinball-qr.readthedocs.io.
 
 
 Features

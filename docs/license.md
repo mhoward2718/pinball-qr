@@ -1,6 +1,6 @@
 # License
 
-Pinball is released under the MIT License.
+Pinball-QR is released under the MIT License.
 
 ```
 MIT License

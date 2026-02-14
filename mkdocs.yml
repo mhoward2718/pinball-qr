@@ -1,8 +1,8 @@
-site_name: Pinball
+site_name: Pinball-QR
 site_description: Fast, accurate quantile regression for Python
-site_url: https://mah38900.github.io/pinball/
-repo_url: https://github.com/mah38900/pinball
-repo_name: mah38900/pinball
+site_url: https://mhoward2718.github.io/pinball-qr/
+repo_url: https://github.com/mhoward2718/pinball-qr
+repo_name: mhoward2718/pinball-qr
 
 theme:
   name: material
@@ -74,9 +74,9 @@ extra_javascript:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/mah38900/pinball
+      link: https://github.com/mhoward2718/pinball-qr
     - icon: fontawesome/brands/python
-      link: https://pypi.org/project/pinball/
+      link: https://pypi.org/project/pinball-qr/
 
 nav:
   - Home: index.md

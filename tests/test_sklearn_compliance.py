@@ -19,6 +19,19 @@ from sklearn.utils.estimator_checks import check_estimator
 from pinball import QuantileRegressor
 
 
+def _has_native():
+    try:
+        from pinball._native import rqfnb  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
+_native_required = pytest.mark.skipif(
+    not _has_native(), reason="Fortran extension not built"
+)
+
+
 # ── 1. Mixin ordering ───────────────────────────────────────────────
 
 class TestMixinOrder:
@@ -37,6 +50,7 @@ class TestMixinOrder:
 
 # ── 2. n_features_in_ consistency via validate_data ─────────────────
 
+@_native_required
 class TestNFeaturesConsistency:
     """predict() must raise when input has wrong number of features."""
 
@@ -79,6 +93,7 @@ class TestEdgeCaseErrors:
         with pytest.raises(ValueError, match=r"n_samples"):
             model.fit(X, y)
 
+    @_native_required
     def test_fit_n_lt_p_with_fn_succeeds(self):
         """The FN solver should handle n < p (interior point method)."""
         rng = np.random.RandomState(42)
@@ -93,6 +108,7 @@ class TestEdgeCaseErrors:
 
 # ── 4. sample_weight with wide data shouldn't blow up ───────────────
 
+@_native_required
 class TestSampleWeightWideData:
     """sample_weight path must handle n <= p gracefully."""
 
@@ -119,6 +135,7 @@ class TestSampleWeightWideData:
 
 # ── 5. Full check_estimator pass ────────────────────────────────────
 
+@_native_required
 class TestSklearnCompliance:
     """The estimator should pass sklearn's full check_estimator suite."""
 

@@ -2,7 +2,26 @@
 import numpy as np
 import pytest
 
-from pinball._native import rqbr, rqfnb
+
+def _has_native():
+    try:
+        from pinball._native import rqbr  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
+pytestmark = pytest.mark.skipif(
+    not _has_native(), reason="Fortran extension not built"
+)
+
+
+@pytest.fixture(autouse=True)
+def _import_native():
+    """Lazily import the Fortran extension for every test."""
+    global rqbr, rqfnb
+    from pinball._native import rqbr, rqfnb  # noqa: F811
+
 
 def test_rqbr_smoke():
     """Test rqbr with simple linear data."""

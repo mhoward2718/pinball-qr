@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Fast: lint + pure-Python tests (no compilation) ────────────
+  lint-and-pure-tests:
+    name: Lint & pure tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install pure-Python dependencies only
+        run: |
+          pip install --upgrade pip
+          pip install numpy scipy scikit-learn pytest ruff
+
+      - name: Lint with ruff
+        run: ruff check pinball/ tests/
+
+      - name: Run pure-Python tests (extensions skipped)
+        run: |
+          # Install only the Python source tree (no compilation)
+          # so that test imports work, but compiled extensions are absent.
+          # Tests guarded by _has_native() will be skipped automatically.
+          export PYTHONPATH="${{ github.workspace }}"
+          python -m pytest tests/ -v --tb=short -rs
+        # -rs shows skip reasons so we can see which tests were skipped
+
+  # ── Full: build extensions + run entire test suite ─────────────
+  full-tests:
+    name: Full tests (Python ${{ matrix.python-version }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Fortran compiler (Ubuntu)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y gfortran libopenblas-dev
+
+      - name: Install Fortran compiler (macOS)
+        if: runner.os == 'macOS'
+        run: brew install gcc
+
+      - name: Install Fortran compiler (Windows)
+        if: runner.os == 'Windows'
+        uses: fortran-lang/setup-fortran@v1
+        with:
+          compiler: gcc
+
+      - name: Build and install package (compiles Fortran & C++)
+        run: |
+          pip install --upgrade pip
+          pip install .[dev]
+
+      - name: Run full test suite
+        run: python -m pytest tests/ -v --tb=short

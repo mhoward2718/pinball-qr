@@ -19,10 +19,10 @@ script: tox
 deploy:
   provider: pypi
   distributions: sdist bdist_wheel
-  user: mah38900
+  user: mhoward2718
   password:
     secure: PLEASE_REPLACE_ME
   on:
     tags: true
-    repo: mah38900/quantreg
+    repo: mhoward2718/quantreg
     python: 3.8

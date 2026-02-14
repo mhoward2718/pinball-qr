@@ -3,7 +3,7 @@
 ## From PyPI (recommended)
 
 ```bash
-pip install pinball
+pip install pinball-qr
 ```
 
 ## From Source
@@ -13,8 +13,8 @@ requires a Fortran compiler (e.g. `gfortran`) and the
 [Meson](https://mesonbuild.com/) build system.
 
 ```bash
-git clone https://github.com/mah38900/pinball.git
-cd pinball
+git clone https://github.com/mhoward2718/pinball-qr.git
+cd pinball-qr
 python -m venv .venv
 source .venv/bin/activate
 pip install meson-python meson ninja numpy

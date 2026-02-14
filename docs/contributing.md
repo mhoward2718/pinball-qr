@@ -6,8 +6,8 @@ Contributions are welcome!  Here's how to get started.
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourorg/pinball.git
-cd pinball
+git clone https://github.com/mhoward2718/pinball-qr.git
+cd pinball-qr
 
 # Create a virtual environment
 python -m venv .venv
