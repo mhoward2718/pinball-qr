@@ -11,7 +11,7 @@ References
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 
@@ -38,7 +38,7 @@ class LassoSolver(BaseSolver):
 
     def __init__(
         self,
-        lambda_: Optional[float] = None,
+        lambda_: float | None = None,
         penalize_intercept: bool = False,
         beta: float = 0.99995,
         eps: float = 1e-6,

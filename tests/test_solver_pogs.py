@@ -17,12 +17,12 @@ Test structure (SOLID)
   POGS library (skipped if the native library is not built).
 """
 
+from unittest.mock import patch
+
 import numpy as np
 import pytest
-from unittest.mock import patch, MagicMock
 
 from pinball.linear.solvers.base import BaseSolver, SolverResult
-
 
 # ──────────────────────────────────────────────────────────────────────
 # Helpers
@@ -133,8 +133,8 @@ class TestPOGSSolverValidation:
             solver.solve(X, y, tau=0.5)
 
     def test_native_lib_missing_raises_os_error(self):
-        from pinball.linear.solvers.pogs import POGSSolver
         import pinball.linear.solvers.pogs as pogs_mod
+        from pinball.linear.solvers.pogs import POGSSolver
 
         X, y = _make_data()
         solver = POGSSolver()
@@ -145,9 +145,8 @@ class TestPOGSSolverValidation:
             with patch(
                 "pinball.linear.solvers.pogs._find_native_library",
                 side_effect=OSError("not found"),
-            ):
-                with pytest.raises(OSError, match="not found"):
-                    solver.solve(X, y, tau=0.5)
+            ), pytest.raises(OSError, match="not found"):
+                solver.solve(X, y, tau=0.5)
         finally:
             pogs_mod._lib = old_lib
 
@@ -384,8 +383,8 @@ class TestPOGSSolverIntegration:
 
     def test_engel_median(self):
         """Median coefficients should match BR/FNB on Engel data."""
-        from pinball.linear.solvers.pogs import POGSSolver
         from pinball.datasets import load_engel
+        from pinball.linear.solvers.pogs import POGSSolver
 
         data = load_engel()
         X = np.column_stack([np.ones(len(data.target)), data.data])
@@ -437,8 +436,8 @@ class TestPOGSSolverIntegration:
 
     def test_agrees_with_br_solver(self):
         """POGS and BR should give similar coefficients on well-scaled data."""
-        from pinball.linear.solvers.pogs import POGSSolver
         from pinball.linear.solvers.br import BRSolver
+        from pinball.linear.solvers.pogs import POGSSolver
 
         # Use well-conditioned synthetic data (Engel has a huge condition
         # number due to the intercept column vs. income ~400–5000, which

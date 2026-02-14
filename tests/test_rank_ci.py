@@ -7,7 +7,7 @@ the BR solver with ``ci=True`` and then interpolates the Fortran output.
 import numpy as np
 import pytest
 
-from pinball._inference import summary, InferenceResult
+from pinball._inference import InferenceResult, summary
 
 
 def _has_native():
@@ -38,7 +38,7 @@ def engel_problem():
 def small_problem():
     """Small synthetic problem with known structure."""
     rng = np.random.RandomState(42)
-    n, p = 100, 2
+    n, _p = 100, 2
     X = np.column_stack([np.ones(n), rng.randn(n)])
     beta_true = np.array([3.0, 1.5])
     y = X @ beta_true + rng.randn(n) * 0.5

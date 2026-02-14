@@ -5,7 +5,6 @@ import pytest
 
 from pinball.linear.solvers.base import BaseSolver, SolverResult
 
-
 # ──────────────────────────────────────────────────────────────────────
 # Concrete mock solver for testing the ABC contract
 # ──────────────────────────────────────────────────────────────────────

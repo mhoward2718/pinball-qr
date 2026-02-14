@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from pinball._inference import summary, InferenceResult
+from pinball._inference import InferenceResult, summary
 
 
 def _has_native():

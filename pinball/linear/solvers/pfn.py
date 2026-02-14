@@ -122,7 +122,7 @@ class PreprocessingSolver(BaseSolver):
 
                 n_bad = int(np.sum(su_bad | sl_bad))
                 if n_bad > 0.1 * M:
-                    warnings.warn("Too many fixups — doubling subsample size m.")
+                    warnings.warn("Too many fixups — doubling subsample size m.", stacklevel=2)
                     m = 2 * m
                     break
 

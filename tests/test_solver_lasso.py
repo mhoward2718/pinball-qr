@@ -1,11 +1,12 @@
 """Tests for the L1-penalised (Lasso) quantile regression solver."""
 
+from unittest.mock import MagicMock
+
 import numpy as np
 import pytest
-from unittest.mock import MagicMock, patch
 
-from pinball.linear.solvers.lasso import LassoSolver
 from pinball.linear.solvers.base import SolverResult
+from pinball.linear.solvers.lasso import LassoSolver
 
 
 class TestLassoSolverInit:
@@ -51,7 +52,7 @@ class TestLassoSolverSolve:
         )
         solver._fnb = mock_fnb
 
-        result = solver.solve(X, y, tau=0.5)
+        solver.solve(X, y, tau=0.5)
 
         # FNB should have been called with augmented matrix (n+p, p)
         call_args = mock_fnb.solve.call_args

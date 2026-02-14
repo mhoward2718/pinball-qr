@@ -15,11 +15,11 @@ SE methods
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional
+from dataclasses import dataclass
 
 import numpy as np
-from scipy.stats import norm, t as student_t
+from scipy.stats import norm
+from scipy.stats import t as student_t
 
 from pinball.util.bandwidth import hall_sheather
 
@@ -45,7 +45,7 @@ class InferenceResult:
     p_values: np.ndarray
     conf_int: np.ndarray
     se_method: str
-    feature_names: Optional[list[str]] = None
+    feature_names: list[str] | None = None
 
     def __repr__(self) -> str:
         lines = [f"InferenceResult(se_method={self.se_method!r})"]
@@ -109,7 +109,7 @@ def _se_nid(
     sorted_resid = np.sort(residuals)
     lo = max(int(np.floor(n * (tau - h))), 0)
     hi = min(int(np.ceil(n * (tau + h))), n - 1)
-    fhat = (2 * h) / (sorted_resid[hi] - sorted_resid[lo] + 1e-20)
+    (2 * h) / (sorted_resid[hi] - sorted_resid[lo] + 1e-20)
 
     # Huber sandwich: (X'X)^{-1} X' D X (X'X)^{-1}
     # where D = diag(psi_i^2), psi_i = tau - I(resid_i < 0)
@@ -256,20 +256,14 @@ def _se_rank(
 
     # Derive pseudo-SE from CI half-width
     df = n - p
-    if df > 0:
-        crit = student_t.ppf(1 - alpha / 2, df)
-    else:
-        crit = norm.ppf(1 - alpha / 2)
+    crit = student_t.ppf(1 - alpha / 2, df) if df > 0 else norm.ppf(1 - alpha / 2)
     half_width = (ci_out[:, 1] - ci_out[:, 0]) / 2.0
     se = half_width / max(crit, 1e-10)
 
     # Build result with rank-based CIs (not SE-derived CIs)
     coef = result.coefficients
     t_stats = coef / (se + 1e-30)
-    if df > 0:
-        p_vals = 2 * student_t.sf(np.abs(t_stats), df)
-    else:
-        p_vals = np.full(p, np.nan)
+    p_vals = 2 * student_t.sf(np.abs(t_stats), df) if df > 0 else np.full(p, np.nan)
 
     return InferenceResult(
         coefficients=coef,
@@ -337,7 +331,7 @@ def summary(
     tau: float,
     se: str = "auto",
     alpha: float = 0.05,
-    feature_names: Optional[list[str]] = None,
+    feature_names: list[str] | None = None,
     **kwargs,
 ) -> InferenceResult:
     """Compute a summary table with standard errors and confidence intervals.
@@ -391,7 +385,7 @@ def summary(
         from pinball.linear._bootstrap import bootstrap as _boot
         nboot = kwargs.get("nboot", 200)
         bsmethod = kwargs.get("method", "xy")
-        random_state = kwargs.get("random_state", None)
+        random_state = kwargs.get("random_state")
         br = _boot(
             X, y, tau=tau, nboot=nboot, method=bsmethod,
             random_state=random_state, alpha=alpha,
@@ -399,10 +393,7 @@ def summary(
         # Build InferenceResult from bootstrap
         t_stats = coefficients / (br.std_errors + 1e-30)
         df = n - p
-        if df > 0:
-            p_vals = 2 * student_t.sf(np.abs(t_stats), df)
-        else:
-            p_vals = np.full(p, np.nan)
+        p_vals = 2 * student_t.sf(np.abs(t_stats), df) if df > 0 else np.full(p, np.nan)
         return InferenceResult(
             coefficients=coefficients,
             std_errors=br.std_errors,
@@ -439,10 +430,7 @@ def summary(
         result.p_values = np.full(p, np.nan)
 
     # Confidence interval
-    if df > 0:
-        crit = student_t.ppf(1 - alpha / 2, df)
-    else:
-        crit = norm.ppf(1 - alpha / 2)
+    crit = student_t.ppf(1 - alpha / 2, df) if df > 0 else norm.ppf(1 - alpha / 2)
     result.conf_int = np.column_stack([
         coefficients - crit * result.std_errors,
         coefficients + crit * result.std_errors,

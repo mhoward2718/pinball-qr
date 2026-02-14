@@ -94,14 +94,11 @@ class FNBSolver(BaseSolver):
             a, c, rhs, d, u, beta, eps, wn, wp, nit, info,
         )
 
-        if isinstance(info_out, np.ndarray):
-            info_val = int(info_out.item())
-        else:
-            info_val = int(info_out)
+        info_val = int(info_out.item()) if isinstance(info_out, np.ndarray) else int(info_out)
 
         if info_val != 0:
             warnings.warn(
-                f"rqfnb info = {info_val}: possibly singular design."
+                f"rqfnb info = {info_val}: possibly singular design.", stacklevel=2
             )
 
         coefficients = -wp_out[:, 0]

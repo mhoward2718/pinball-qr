@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional
+from typing import Any
 
 import numpy as np
 
@@ -54,11 +54,11 @@ class SolverResult:
 
     coefficients: FloatArray
     residuals: FloatArray
-    dual_solution: Optional[FloatArray] = None
+    dual_solution: FloatArray | None = None
     objective_value: float = 0.0
     status: int = 0
     iterations: int = 0
-    solver_info: Dict[str, Any] = field(default_factory=dict)
+    solver_info: dict[str, Any] = field(default_factory=dict)
 
 
 class BaseSolver(ABC):
@@ -119,7 +119,7 @@ class BaseSolver(ABC):
     ) -> SolverResult:
         """Core solving logic — implemented by every concrete solver."""
 
-    def validate_inputs(
+    def validate_inputs(  # noqa: B027
         self,
         X: np.ndarray,
         y: np.ndarray,
@@ -162,8 +162,8 @@ class BaseSolver(ABC):
             raise ValueError(f"tau must be in (0, 1), got {tau}.")
         if n < 2:
             raise ValueError(
-                f"Got 1 sample, need at least 2 n_samples for "
-                f"quantile regression."
+                "Got 1 sample, need at least 2 n_samples for "
+                "quantile regression."
             )
 
         # Solver-specific checks

@@ -12,8 +12,6 @@ Usage
 
 from __future__ import annotations
 
-from typing import Dict, Type
-
 from pinball.linear.solvers.base import BaseSolver, SolverResult
 
 __all__ = [
@@ -28,14 +26,14 @@ __all__ = [
 # Private registry
 # ──────────────────────────────────────────────────────────────────────
 
-_REGISTRY: Dict[str, Type[BaseSolver]] = {}
+_REGISTRY: dict[str, type[BaseSolver]] = {}
 
 
 # ──────────────────────────────────────────────────────────────────────
 # Public helpers
 # ──────────────────────────────────────────────────────────────────────
 
-def register_solver(name: str, cls: Type[BaseSolver]) -> None:
+def register_solver(name: str, cls: type[BaseSolver]) -> None:
     """Register a solver class under *name*.
 
     Parameters

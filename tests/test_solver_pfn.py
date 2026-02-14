@@ -1,11 +1,10 @@
 """Tests for the Preprocessing + Frisch-Newton solver."""
 
-import numpy as np
-import pytest
-from unittest.mock import MagicMock
 
-from pinball.linear.solvers.pfn import PreprocessingSolver
+import numpy as np
+
 from pinball.linear.solvers.base import BaseSolver, SolverResult
+from pinball.linear.solvers.pfn import PreprocessingSolver
 
 
 class _FakeInnerSolver(BaseSolver):

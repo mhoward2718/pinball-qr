@@ -8,9 +8,8 @@ Reference values computed from R:
 """
 
 import numpy as np
-import pytest
 
-from pinball.util.bandwidth import hall_sheather, bofinger, chamberlain
+from pinball.util.bandwidth import bofinger, chamberlain, hall_sheather
 
 
 class TestHallSheather:

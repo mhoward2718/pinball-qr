@@ -1,11 +1,10 @@
 """Tests for the Frisch-Newton interior-point solver."""
 
+
 import numpy as np
 import pytest
-from unittest.mock import MagicMock, patch
 
 from pinball.linear.solvers.fnb import FNBSolver
-from pinball.linear.solvers.base import SolverResult
 
 
 class TestFNBSolver:
@@ -49,11 +48,8 @@ class TestFNBSolver:
 # ──────────────────────────────────────────────────────────────────────
 
 def _has_native():
-    try:
-        from pinball._native import rqfnb
-        return True
-    except ImportError:
-        return False
+    import importlib.util
+    return importlib.util.find_spec("pinball._native") is not None
 
 
 @pytest.mark.skipif(not _has_native(), reason="Fortran extension not built")

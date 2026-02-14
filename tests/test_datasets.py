@@ -1,9 +1,8 @@
 """Tests for dataset loaders."""
 
 import numpy as np
-import pytest
 
-from pinball.datasets import load_engel, load_barro
+from pinball.datasets import load_barro, load_engel
 
 
 class TestLoadEngel:

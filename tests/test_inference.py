@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from pinball._inference import summary, InferenceResult, _se_iid, _se_nid
+from pinball._inference import InferenceResult, summary
 
 
 def _has_native():
@@ -35,7 +35,7 @@ class TestSummary:
     @pytest.fixture
     def problem(self):
         rng = np.random.RandomState(42)
-        n, p = 200, 3
+        n, _p = 200, 3
         X = np.column_stack([np.ones(n), rng.randn(n, 2)])
         beta_true = np.array([5.0, 2.0, -1.0])
         y = X @ beta_true + rng.randn(n) * 0.5

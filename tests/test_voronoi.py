@@ -7,8 +7,6 @@ These test the low-level building blocks that the full estimator relies on:
 """
 
 import numpy as np
-import pytest
-
 
 # ============================================================
 # 1.  voronoi_assign

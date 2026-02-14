@@ -24,7 +24,6 @@ References
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional, Union
 
 import numpy as np
 from scipy.stats import norm
@@ -73,7 +72,7 @@ def bootstrap(
     tau: float = 0.5,
     nboot: int = 200,
     method: str = "xy",
-    random_state: Optional[Union[int, np.random.RandomState]] = None,
+    random_state: int | np.random.RandomState | None = None,
     alpha: float = 0.05,
     **kwargs,
 ) -> BootstrapResult:
@@ -123,7 +122,7 @@ def bootstrap(
 # ──────────────────────────────────────────────────────────────────────────────
 
 def _ensure_rng(
-    random_state: Optional[Union[int, np.random.RandomState]],
+    random_state: int | np.random.RandomState | None,
 ) -> np.random.RandomState:
     """Coerce *random_state* to a ``RandomState`` instance."""
     if random_state is None:
@@ -177,9 +176,9 @@ def _xy_pairs(
     y: np.ndarray,
     tau: float = 0.5,
     nboot: int = 200,
-    random_state: Optional[Union[int, np.random.RandomState]] = None,
+    random_state: int | np.random.RandomState | None = None,
     alpha: float = 0.05,
-    mofn: Optional[int] = None,
+    mofn: int | None = None,
     **kwargs,
 ) -> BootstrapResult:
     """XY-pair (case) bootstrap for quantile regression.
@@ -225,7 +224,7 @@ def _wild(
     y: np.ndarray,
     tau: float = 0.5,
     nboot: int = 200,
-    random_state: Optional[Union[int, np.random.RandomState]] = None,
+    random_state: int | np.random.RandomState | None = None,
     alpha: float = 0.05,
     **kwargs,
 ) -> BootstrapResult:
@@ -290,7 +289,7 @@ def _mcmb(
     y: np.ndarray,
     tau: float = 0.5,
     nboot: int = 200,
-    random_state: Optional[Union[int, np.random.RandomState]] = None,
+    random_state: int | np.random.RandomState | None = None,
     alpha: float = 0.05,
     **kwargs,
 ) -> BootstrapResult:

@@ -8,7 +8,6 @@ computation into a single fit/predict workflow.
 import numpy as np
 import pytest
 
-
 # ============================================================
 # Helpers
 # ============================================================
@@ -94,6 +93,7 @@ class TestEstimatorFit:
 
     def test_is_fitted_after_fit(self):
         from sklearn.utils.validation import check_is_fitted
+
         from pinball.nonparametric.quantization._estimator import (
             QuantizationQuantileEstimator,
         )
@@ -158,11 +158,14 @@ class TestEstimatorPredict:
         assert preds.shape == (10,)
 
     def test_predict_before_fit_raises(self):
+        from sklearn.exceptions import NotFittedError
+
         from pinball.nonparametric.quantization._estimator import (
             QuantizationQuantileEstimator,
         )
+
         est = QuantizationQuantileEstimator()
-        with pytest.raises(Exception):
+        with pytest.raises(NotFittedError):
             est.predict(np.array([[1.0]]))
 
     def test_median_prediction_reasonable(self):

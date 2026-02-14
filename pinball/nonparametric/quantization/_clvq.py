@@ -20,8 +20,6 @@ References
 
 from __future__ import annotations
 
-from typing import Dict
-
 import numpy as np
 
 
@@ -31,7 +29,7 @@ def choice_grid(
     n_grids: int = 1,
     p: int | float = 2,
     random_state: int | np.random.RandomState | None = None,
-) -> Dict[str, np.ndarray]:
+) -> dict[str, np.ndarray]:
     """Construct optimal quantization grids for *X* via CLVQ.
 
     Parameters
@@ -87,7 +85,7 @@ def _choice_grid_1d(
     ng: int,
     p: float,
     rng: np.random.RandomState,
-) -> Dict[str, np.ndarray]:
+) -> dict[str, np.ndarray]:
     """CLVQ for univariate X.  Mirrors R's ``choice.grid`` vector branch."""
     n = len(X)
 
@@ -161,7 +159,7 @@ def _choice_grid_nd(
     ng: int,
     p: float,
     rng: np.random.RandomState,
-) -> Dict[str, np.ndarray]:
+) -> dict[str, np.ndarray]:
     """CLVQ for d-dimensional X.  Mirrors R's ``choice.grid`` matrix branch."""
     d, n = X.shape
 

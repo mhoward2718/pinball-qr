@@ -8,7 +8,6 @@ R's ``QuantifQuantile::choice.grid``.
 import numpy as np
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # choice_grid output shape and basic invariants
 # ---------------------------------------------------------------------------

@@ -49,12 +49,11 @@ import ctypes
 import pathlib
 import sys
 from dataclasses import dataclass
-from typing import Any, List, Optional, Tuple
+from typing import Any
 
 import numpy as np
 
 from pinball.linear.solvers.base import BaseSolver, SolverResult
-
 
 # ──────────────────────────────────────────────────────────────────────
 # Lightweight stand-in for POGS FunctionObj / Function enums.
@@ -88,7 +87,7 @@ def _build_graph_form(
     X: np.ndarray,
     y: np.ndarray,
     tau: float,
-) -> Tuple[List[_FunctionObj], List[_FunctionObj]]:
+) -> tuple[list[_FunctionObj], list[_FunctionObj]]:
     """Map (X, y, tau) to POGS graph-form function arrays.
 
     Parameters
@@ -124,7 +123,7 @@ def _build_graph_form(
 # Native library loading (lazy singleton)
 # ──────────────────────────────────────────────────────────────────────
 
-_lib: Optional[ctypes.CDLL] = None
+_lib: ctypes.CDLL | None = None
 
 
 def _find_native_library() -> pathlib.Path:
@@ -208,8 +207,8 @@ def _get_lib() -> ctypes.CDLL:
 
 def _call_pogs(
     A: np.ndarray,
-    f: List[_FunctionObj],
-    g: List[_FunctionObj],
+    f: list[_FunctionObj],
+    g: list[_FunctionObj],
     *,
     abs_tol: float = 1e-4,
     rel_tol: float = 1e-4,

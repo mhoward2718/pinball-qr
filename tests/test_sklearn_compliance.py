@@ -13,7 +13,6 @@ These tests cover the four specific failures found by
 
 import numpy as np
 import pytest
-from sklearn.base import clone
 from sklearn.utils.estimator_checks import check_estimator
 
 from pinball import QuantileRegressor

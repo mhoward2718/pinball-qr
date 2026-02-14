@@ -72,7 +72,8 @@ not lost.
 
 from __future__ import annotations
 
-from typing import Any, Dict, Optional, Sequence, Union
+from collections.abc import Sequence
+from typing import Any
 
 import numpy as np
 from sklearn.utils.validation import check_is_fitted, validate_data
@@ -135,10 +136,10 @@ class QuantileRegressor(BaseQuantileEstimator):
 
     def __init__(
         self,
-        tau: Union[float, Sequence[float]] = 0.5,
+        tau: float | Sequence[float] = 0.5,
         method: str = "fn",
         fit_intercept: bool = True,
-        solver_options: Optional[Dict[str, Any]] = None,
+        solver_options: dict[str, Any] | None = None,
     ) -> None:
         self.tau = tau
         self.method = method

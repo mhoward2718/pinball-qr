@@ -1,12 +1,12 @@
 """Tests for the QuantileRegressor sklearn-compatible estimator."""
 
+from unittest.mock import MagicMock, patch
+
 import numpy as np
 import pytest
-from unittest.mock import MagicMock, patch
 
 from pinball._estimator import QuantileRegressor
 from pinball.linear.solvers.base import SolverResult
-
 
 # ──────────────────────────────────────────────────────────────────────
 # Helper: mock solver that returns known coefficients
@@ -128,7 +128,7 @@ class TestQuantileRegressorFit:
         weights = np.ones(len(y))
 
         with patch("pinball.linear._estimator.get_solver", return_value=mock_solver):
-            model = QuantileRegressor().fit(X, y, sample_weight=weights)
+            QuantileRegressor().fit(X, y, sample_weight=weights)
 
         # Solver should have been called once
         mock_solver.solve.assert_called_once()
@@ -144,8 +144,9 @@ class TestQuantileRegressorPredict:
         assert pred.shape == (10,)
 
     def test_predict_not_fitted_raises(self):
+        from sklearn.exceptions import NotFittedError
         model = QuantileRegressor()
-        with pytest.raises(Exception):  # sklearn's NotFittedError
+        with pytest.raises(NotFittedError):
             model.predict(np.random.randn(5, 2))
 
     def test_predict_values(self):

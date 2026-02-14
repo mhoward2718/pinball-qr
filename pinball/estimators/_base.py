@@ -20,7 +20,6 @@ Design principles
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Sequence, Union
 
 import numpy as np
 from sklearn.base import BaseEstimator, RegressorMixin

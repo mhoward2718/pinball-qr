@@ -19,14 +19,15 @@ References
 from __future__ import annotations
 
 import warnings
-from typing import Any, Callable, Optional
+from collections.abc import Callable
+from typing import Any
 
 import numpy as np
-from scipy.stats import norm, t as student_t
+from scipy.stats import norm
+from scipy.stats import t as student_t
 
 from pinball.linear.solvers.base import BaseSolver, SolverResult
 from pinball.util.bandwidth import hall_sheather
-
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Helpers – parameter derivation
@@ -132,7 +133,7 @@ def _get_wls_weights(
     dyhat = X @ (bhi - blo)
     if np.any(dyhat <= 0):
         pct = 100.0 * np.sum(dyhat <= 0) / n
-        warnings.warn(f"Percent fis <= 0: {pct:.1f}")
+        warnings.warn(f"Percent fis <= 0: {pct:.1f}", stacklevel=2)
 
     return np.maximum(eps, (2.0 * h) / (dyhat - eps))
 
@@ -268,10 +269,7 @@ class BRSolver(BaseSolver):
             ci = True
 
         if ci:
-            if tcrit:
-                cutoff = student_t.ppf(1 - alpha / 2, n - p)
-            else:
-                cutoff = norm.ppf(1 - alpha / 2)
+            cutoff = student_t.ppf(1 - alpha / 2, n - p) if tcrit else norm.ppf(1 - alpha / 2)
             qn = _get_rank_inversion_qn(X, y, tau, iid=iid, bandwidth_method=bw)
             params.update(lci1=np.bool_(True), qn=qn, cutoff=np.float64(cutoff))
 
@@ -293,7 +291,7 @@ class BRSolver(BaseSolver):
 
         if flag:
             warnings.warn(
-                "Solution may be non-unique — possible conditioning problem in X."
+                "Solution may be non-unique — possible conditioning problem in X.", stacklevel=2
             )
 
         # Compute objective value (weighted pinball loss)

@@ -106,10 +106,7 @@ class QuantizationQuantileEstimator(BaseQuantileEstimator):
         alpha = np.array([self.tau])
 
         # Prepare covariate for CLVQ: 1-D vector or (d, n) matrix
-        if d == 1:
-            X_clvq = X.ravel()
-        else:
-            X_clvq = X.T  # (d, n)
+        X_clvq = X.ravel() if d == 1 else X.T  # noqa: SIM108
 
         grids = choice_grid(
             X_clvq, N_eff, n_grids=self.n_grids,
@@ -124,10 +121,7 @@ class QuantizationQuantileEstimator(BaseQuantileEstimator):
         cell_q_count = np.zeros((N_eff, 1), dtype=np.float64)
 
         for g in range(n_grids):
-            if d == 1:
-                grid_g = opt_grids[:, g]  # (N_eff,)
-            else:
-                grid_g = opt_grids[:, :, g]  # (d, N_eff)
+            grid_g = opt_grids[:, g] if d == 1 else opt_grids[:, :, g]
 
             assignments = voronoi_assign(X_clvq, grid_g)
             cq = cell_quantiles(y, assignments, N_eff, alpha)
@@ -137,10 +131,7 @@ class QuantizationQuantileEstimator(BaseQuantileEstimator):
             cell_q_count[valid] += 1.0
 
         # Average grid centroids across all bootstrap grids
-        if d == 1:
-            avg_grid = np.mean(opt_grids, axis=1)  # (N_eff,)
-        else:
-            avg_grid = np.mean(opt_grids, axis=2)  # (d, N_eff)
+        avg_grid = np.mean(opt_grids, axis=1) if d == 1 else np.mean(opt_grids, axis=2)
 
         # Average cell quantiles (NaN where no grid ever had data)
         with np.errstate(invalid="ignore"):
@@ -197,10 +188,7 @@ class QuantizationQuantileEstimator(BaseQuantileEstimator):
         X = validate_data(self, X, reset=False)
         n, d = X.shape
 
-        if d == 1:
-            x_q = X.ravel()
-        else:
-            x_q = X.T  # (d, m)
+        x_q = X.ravel() if d == 1 else X.T
 
         preds = predict_quantiles(x_q, self.grid_, self.cell_quantiles_)
         # preds: (m, 1) → flatten

@@ -6,13 +6,13 @@ marked with ``@pytest.mark.fortran`` and skipped when the extension is
 not available.
 """
 
+from unittest.mock import MagicMock, patch
+
 import numpy as np
 import pytest
-from unittest.mock import patch, MagicMock
 
-from pinball.linear.solvers.br import BRSolver, _derive_br_params, _get_wls_weights
 from pinball.linear.solvers.base import SolverResult
-
+from pinball.linear.solvers.br import BRSolver, _derive_br_params, _get_wls_weights
 
 # ──────────────────────────────────────────────────────────────────────
 # Parameter derivation
@@ -104,14 +104,16 @@ class TestBRSolver:
         solver = BRSolver()
         with patch("pinball.linear.solvers.br.rqbr", create=True) as mock:
             mock.return_value = self._mock_rqbr_return(n, p)
-            with patch.dict("sys.modules", {"pinball._native": MagicMock(rqbr=mock)}):
-                with patch("pinball.linear.solvers.br.BRSolver._solve_impl") as mock_impl:
-                    # Direct mock of the implementation
-                    mock_impl.return_value = SolverResult(
-                        coefficients=np.array([1.0, 2.0, 3.0]),
-                        residuals=np.zeros(n),
-                    )
-                    result = solver.solve(X, y, tau=0.5)
+            with (
+                patch.dict("sys.modules", {"pinball._native": MagicMock(rqbr=mock)}),
+                patch("pinball.linear.solvers.br.BRSolver._solve_impl") as mock_impl,
+            ):
+                # Direct mock of the implementation
+                mock_impl.return_value = SolverResult(
+                    coefficients=np.array([1.0, 2.0, 3.0]),
+                    residuals=np.zeros(n),
+                )
+                result = solver.solve(X, y, tau=0.5)
         assert isinstance(result, SolverResult)
 
     def test_singular_matrix_raises(self):
@@ -171,11 +173,8 @@ class TestGetWLSWeights:
 # ──────────────────────────────────────────────────────────────────────
 
 def _has_native():
-    try:
-        from pinball._native import rqbr
-        return True
-    except ImportError:
-        return False
+    import importlib.util
+    return importlib.util.find_spec("pinball._native") is not None
 
 
 @pytest.mark.skipif(not _has_native(), reason="Fortran extension not built")

@@ -8,10 +8,10 @@ import pytest
 
 from pinball._bootstrap import (
     BootstrapResult,
-    bootstrap,
-    _xy_pairs,
-    _wild,
     _mcmb,
+    _wild,
+    _xy_pairs,
+    bootstrap,
 )
 
 
@@ -142,7 +142,7 @@ class TestXYPairsBootstrap:
     def test_mofn_subsampling(self, synthetic_problem):
         """m-of-n subsampling: smaller subsample should give wider SE."""
         X, y, _ = synthetic_problem
-        r_full = _xy_pairs(X, y, tau=0.5, nboot=100, random_state=42)
+        _xy_pairs(X, y, tau=0.5, nboot=100, random_state=42)
         r_sub = _xy_pairs(X, y, tau=0.5, nboot=100, random_state=42, mofn=50)
         # Subsampled bootstrap usually gives wider SE after sqrt(m/n) scaling
         # Just check it runs and shapes are correct
@@ -227,7 +227,7 @@ class TestBootstrapSummaryIntegration:
 
     def test_summary_se_boot(self, synthetic_problem):
         """summary(se='boot') should use bootstrap for SE estimation."""
-        from pinball._inference import summary, InferenceResult
+        from pinball._inference import InferenceResult, summary
         X, y, _ = synthetic_problem
         from pinball.linear.solvers.fnb import FNBSolver
         coef = FNBSolver().solve(X, y, 0.5).coefficients
