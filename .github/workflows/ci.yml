@@ -81,6 +81,18 @@ jobs:
           pip install --upgrade pip
           pip install .[dev]
 
+      - name: Verify extensions are installed
+        run: |
+          python -c "import pinball._native; print('Fortran extension OK:', dir(pinball._native))"
+          python -c "
+          import importlib.util, pathlib
+          spec = importlib.util.find_spec('pinball')
+          pkg_dir = pathlib.Path(spec.origin).parent
+          print('Package location:', pkg_dir)
+          for f in sorted(pkg_dir.iterdir()):
+              print(' ', f.name)
+          "
+
       - name: Run full test suite
         run: |
           # Run from /tmp so Python imports the *installed* package (with
