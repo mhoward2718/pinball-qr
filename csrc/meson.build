@@ -30,20 +30,28 @@ pogs_inc = include_directories(
 # On macOS, use the Accelerate framework (always available, no MKL needed).
 # On Linux, fall back to pkg-config / cmake discovery.
 # On Windows, CI installs OpenBLAS and sets PKG_CONFIG_PATH.
+cxx = meson.get_compiler('cpp')
 if host_machine.system() == 'darwin'
   blas_lapack = [dependency('Accelerate', required: true)]
 elif host_machine.system() == 'windows'
   blas_lapack = [dependency('openblas', required: true)]
 else
-  # Try OpenBLAS first (what manylinux / yum provides), then generic blas+lapack.
-  _openblas = dependency('openblas', required: false)
-  if _openblas.found()
-    blas_lapack = [_openblas]
+  # 1. pkg-config / cmake: dependency('openblas')
+  _openblas_dep = dependency('openblas', required: false)
+  if _openblas_dep.found()
+    blas_lapack = [_openblas_dep]
   else
-    blas_lapack = [
-      dependency('blas', required: true),
-      dependency('lapack', required: true),
-    ]
+    # 2. pkg-config: dependency('blas') + dependency('lapack')
+    _blas_dep = dependency('blas', required: false)
+    _lapack_dep = dependency('lapack', required: false)
+    if _blas_dep.found() and _lapack_dep.found()
+      blas_lapack = [_blas_dep, _lapack_dep]
+    else
+      # 3. Direct library search (manylinux2014 has no .pc files)
+      blas_lapack = [
+        cxx.find_library('openblas', required: true),
+      ]
+    endif
   endif
 endif
 

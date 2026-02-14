@@ -26,22 +26,28 @@ incdir_f2py = run_command(
 f2py_source = incdir_f2py / 'fortranobject.c'
 
 # ── BLAS / LAPACK (needed by rqfn, rqfnb, rqbr — they call dswap, dgemv, …) ──
+cc = meson.get_compiler('c')
 if host_machine.system() == 'darwin'
   blas_lapack = [dependency('Accelerate', required: true)]
 elif host_machine.system() == 'windows'
-  # On Windows, CI installs OpenBLAS and sets PKG_CONFIG_PATH.
-  # OpenBLAS bundles LAPACK, so one dependency covers both.
   blas_lapack = [dependency('openblas', required: true)]
 else
-  # Try OpenBLAS first (what manylinux / yum provides), then generic blas+lapack.
-  _openblas = dependency('openblas', required: false)
-  if _openblas.found()
-    blas_lapack = [_openblas]
+  # 1. pkg-config / cmake: dependency('openblas')
+  _openblas_dep = dependency('openblas', required: false)
+  if _openblas_dep.found()
+    blas_lapack = [_openblas_dep]
   else
-    blas_lapack = [
-      dependency('blas', required: true),
-      dependency('lapack', required: true),
-    ]
+    # 2. pkg-config: dependency('blas') + dependency('lapack')
+    _blas_dep = dependency('blas', required: false)
+    _lapack_dep = dependency('lapack', required: false)
+    if _blas_dep.found() and _lapack_dep.found()
+      blas_lapack = [_blas_dep, _lapack_dep]
+    else
+      # 3. Direct library search (manylinux2014 has no .pc files)
+      blas_lapack = [
+        cc.find_library('openblas', required: true),
+      ]
+    endif
   endif
 endif
 
