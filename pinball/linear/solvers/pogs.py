@@ -185,6 +185,7 @@ def _get_lib() -> ctypes.CDLL:
         # pinball._dll_setup and works even if that module has not yet
         # executed (e.g. direct ctypes usage without importing pinball).
         if sys.platform == "win32":
+            import contextlib
             import os
 
             for d in (
@@ -193,10 +194,8 @@ def _get_lib() -> ctypes.CDLL:
                 lib_path.parent.parent / "pinball.libs",  # delvewheel
             ):
                 if d.is_dir():
-                    try:
+                    with contextlib.suppress(OSError):
                         os.add_dll_directory(str(d))
-                    except OSError:
-                        pass
 
         _lib = ctypes.CDLL(str(lib_path))
 
