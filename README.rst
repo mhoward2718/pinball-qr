@@ -9,7 +9,7 @@ Pinball-QR
 .. image:: https://github.com/mhoward2718/pinball-qr/actions/workflows/ci.yml/badge.svg
         :target: https://github.com/mhoward2718/pinball-qr/actions/workflows/ci.yml
 
-.. image:: docs/pinball_logo.png
+.. image:: docs/pinball_logo.jpg
 
 
 The fastest and most accurate methods for quantile regression, now in python.
