@@ -178,6 +178,26 @@ def _get_lib() -> ctypes.CDLL:
     global _lib
     if _lib is None:
         lib_path = _find_native_library()
+
+        # On Windows, register DLL search directories so that runtime
+        # dependencies (OpenBLAS, MinGW runtime) bundled by delvewheel
+        # can be found.  This supplements the early setup done by
+        # pinball._dll_setup and works even if that module has not yet
+        # executed (e.g. direct ctypes usage without importing pinball).
+        if sys.platform == "win32":
+            import os
+
+            for d in (
+                lib_path.parent,                          # package dir
+                lib_path.parent / ".libs",                # legacy vendor
+                lib_path.parent.parent / "pinball.libs",  # delvewheel
+            ):
+                if d.is_dir():
+                    try:
+                        os.add_dll_directory(str(d))
+                    except OSError:
+                        pass
+
         _lib = ctypes.CDLL(str(lib_path))
 
         # Declare the C signature for qr_pogs_solve
