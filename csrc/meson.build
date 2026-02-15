@@ -34,7 +34,16 @@ cxx = meson.get_compiler('cpp')
 if host_machine.system() == 'darwin'
   blas_lapack = [dependency('Accelerate', required: true)]
 elif host_machine.system() == 'windows'
-  blas_lapack = [dependency('openblas', required: true)]
+  # Try pkg-config / cmake first, then fall back to direct library search.
+  # cibuildwheel venvs may not see Chocolatey's pkg-config on PATH.
+  _openblas_dep = dependency('openblas', required: false)
+  if _openblas_dep.found()
+    blas_lapack = [_openblas_dep]
+  else
+    blas_lapack = [
+      cxx.find_library('openblas', dirs: ['C:/openblas/lib'], required: true),
+    ]
+  endif
 else
   # 1. pkg-config / cmake: dependency('openblas')
   _openblas_dep = dependency('openblas', required: false)

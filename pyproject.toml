@@ -114,3 +114,4 @@ repair-wheel-command = "delvewheel repair --add-path C:/openblas/bin -w {dest_di
 
 [tool.cibuildwheel.windows.environment]
 PKG_CONFIG_PATH = "C:/openblas/lib/pkgconfig"
+LIBRARY_PATH = "C:/openblas/lib"
