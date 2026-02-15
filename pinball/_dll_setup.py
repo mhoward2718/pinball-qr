@@ -20,9 +20,11 @@ def _setup_windows_dll_dirs() -> None:
 
     added: set[str] = set()
 
-    # 1. Package directory (delvewheel .libs sub-directory)
+    # 1. Package directory + vendored-DLL directories
     pkg_dir = os.path.dirname(os.path.abspath(__file__))
-    for d in (pkg_dir, os.path.join(pkg_dir, ".libs")):
+    # delvewheel puts vendored DLLs in  <package>.libs/  (sibling of pkg_dir)
+    site_libs = os.path.join(os.path.dirname(pkg_dir), "pinball.libs")
+    for d in (pkg_dir, os.path.join(pkg_dir, ".libs"), site_libs):
         if os.path.isdir(d) and d not in added:
             try:
                 os.add_dll_directory(d)
