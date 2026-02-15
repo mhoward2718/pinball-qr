@@ -23,7 +23,7 @@ from pinball.linear.solvers.base import BaseSolver, SolverResult
 
 __author__ = """Michael Howard"""
 __email__ = "mah38900@gmail.com"
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 
 __all__ = [
     "BaseQuantileEstimator",

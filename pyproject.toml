@@ -4,7 +4,7 @@ build-backend = "mesonpy"
 
 [project]
 name = "pinball-qr"
-version = "0.1.0"
+version = "1.0.0"
 description = "Fast and accurate quantile regression for Python, with an sklearn-compatible interface."
 readme = "README.rst"
 license = {text = "MIT"}
