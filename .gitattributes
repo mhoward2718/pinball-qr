@@ -1,0 +1,11 @@
+# Tell GitHub Linguist to treat vendored / generated code correctly
+# so the repo is classified as Python.
+
+# Vendored POGS C++ library
+csrc/pogs/** linguist-vendored
+
+# Fortran solvers ported from R's quantreg (not original project code)
+fortran/*.f linguist-vendored
+
+# Generated site
+site/** linguist-generated
