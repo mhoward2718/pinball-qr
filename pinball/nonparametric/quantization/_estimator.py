@@ -5,14 +5,23 @@ Charlier, Paindaveine & Saracco (2015) as a scikit-learn--compatible
 estimator.
 
 The algorithm:
-1. Construct *n_grids* L_p-optimal quantization grids of size *N*
-   for the covariate X using CLVQ (``choice_grid``).
-2. For each grid, assign every training (X_i, Y_i) to its Voronoi cell
-   and compute the sample ``tau``-quantile of Y within each cell.
-3. Average the per-grid quantile estimates to obtain the final
-   cell-level conditional quantile.
-4. At prediction time, assign each new x to its nearest grid cell and
-   return the corresponding averaged conditional quantile.
+1. Construct *n_grids* independent, L_p-optimal quantization grids of
+   size *N* for the covariate X using CLVQ (``choice_grid``).
+2. For each grid *separately*, assign every training (X_i, Y_i) to its
+   Voronoi cell and compute the sample ``tau``-quantile of Y within
+   each cell -- this gives *n_grids* independent cell-quantile tables.
+3. At prediction time, assign each new x to its nearest cell *within
+   each grid separately*, look up that grid's cell-quantile estimate,
+   and average the resulting *n_grids* predicted values.
+
+Bagging happens in prediction space (averaging predicted quantile
+values across grids), not in grid-geometry space. The N points of two
+independently-initialised/updated grids have no correspondence to each
+other (grid A's 7th point and grid B's 7th point represent unrelated
+regions), so averaging grid-point *positions* across grids is invalid
+-- it collapses the quantizer toward the data's centroid instead of
+covering its support. This mirrors R's ``QuantifQuantile`` reference
+implementation, which never averages grid positions either.
 
 References
 ----------
@@ -23,16 +32,14 @@ References
 
 from __future__ import annotations
 
+import warnings
+
 import numpy as np
 from sklearn.utils.validation import check_is_fitted, validate_data
 
 from pinball.estimators._base import BaseQuantileEstimator
 from pinball.nonparametric.quantization._clvq import choice_grid
-from pinball.nonparametric.quantization._voronoi import (
-    cell_quantiles,
-    predict_quantiles,
-    voronoi_assign,
-)
+from pinball.nonparametric.quantization._voronoi import cell_quantiles, voronoi_assign
 
 
 class QuantizationQuantileEstimator(BaseQuantileEstimator):
@@ -54,10 +61,14 @@ class QuantizationQuantileEstimator(BaseQuantileEstimator):
 
     Attributes
     ----------
-    grid_ : ndarray, shape (N,) or (d, N)
-        Averaged optimal quantization grid (centroid of all grids).
-    cell_quantiles_ : ndarray, shape (N, 1)
-        Averaged conditional-quantile estimates per Voronoi cell.
+    grids_ : ndarray, shape (N, n_grids) or (d, N, n_grids)
+        The ``n_grids`` independent optimal quantization grids.
+    cell_quantiles_ : ndarray, shape (N, n_grids)
+        Per-grid conditional-quantile estimate for each Voronoi cell.
+        ``cell_quantiles_[j, g]`` is grid *g*'s ``tau``-quantile estimate
+        for its cell *j*; NaN where that cell had no training data.
+    N_eff_ : int
+        Effective grid size actually used (``min(N, n_samples)``).
     n_features_in_ : int
         Number of features seen during ``fit``.
     """
@@ -115,45 +126,19 @@ class QuantizationQuantileEstimator(BaseQuantileEstimator):
         opt_grids = grids["optimal_grid"]
         # opt_grids shape: (N_eff, n_grids) for 1-D, (d, N_eff, n_grids) for d-D
 
-        # Accumulate cell quantile estimates across grids
-        n_grids = self.n_grids
-        cell_q_accum = np.zeros((N_eff, 1), dtype=np.float64)
-        cell_q_count = np.zeros((N_eff, 1), dtype=np.float64)
-
-        for g in range(n_grids):
+        # Each grid gets its own independent cell-quantile table. These are
+        # kept separate (not merged into one grid) -- see the module
+        # docstring for why averaging grid *positions* across independently
+        # constructed grids is invalid.
+        cell_quantiles_per_grid = np.full((N_eff, self.n_grids), np.nan, dtype=np.float64)
+        for g in range(self.n_grids):
             grid_g = opt_grids[:, g] if d == 1 else opt_grids[:, :, g]
-
             assignments = voronoi_assign(X_clvq, grid_g)
-            cq = cell_quantiles(y, assignments, N_eff, alpha)
-            # cq: (N_eff, 1) — NaN where no data in cell
-            valid = ~np.isnan(cq)
-            cell_q_accum[valid] += cq[valid]
-            cell_q_count[valid] += 1.0
+            cq = cell_quantiles(y, assignments, N_eff, alpha)  # (N_eff, 1)
+            cell_quantiles_per_grid[:, g] = cq[:, 0]
 
-        # Average grid centroids across all bootstrap grids
-        avg_grid = np.mean(opt_grids, axis=1) if d == 1 else np.mean(opt_grids, axis=2)
-
-        # Average cell quantiles (NaN where no grid ever had data)
-        with np.errstate(invalid="ignore"):
-            avg_cell_q = np.where(
-                cell_q_count > 0,
-                cell_q_accum / cell_q_count,
-                np.nan,
-            )
-
-        # Re-compute assignments and cell quantiles on the averaged grid
-        # to get a single consistent estimator
-        assignments_avg = voronoi_assign(X_clvq, avg_grid)
-        cell_q_final = cell_quantiles(y, assignments_avg, N_eff, alpha)
-
-        # Where the averaged grid's cells have data, use those;
-        # otherwise fall back to the bootstrap average
-        for j in range(N_eff):
-            if np.isnan(cell_q_final[j, 0]) and not np.isnan(avg_cell_q[j, 0]):
-                cell_q_final[j] = avg_cell_q[j]
-
-        self.grid_ = avg_grid
-        self.cell_quantiles_ = cell_q_final
+        self.grids_ = opt_grids
+        self.cell_quantiles_ = cell_quantiles_per_grid
         self.N_eff_ = N_eff
         return self
 
@@ -190,6 +175,15 @@ class QuantizationQuantileEstimator(BaseQuantileEstimator):
 
         x_q = X.ravel() if d == 1 else X.T
 
-        preds = predict_quantiles(x_q, self.grid_, self.cell_quantiles_)
-        # preds: (m, 1) → flatten
-        return preds.ravel()
+        # Bag in prediction space: assign each query point to its nearest
+        # cell *within each grid separately*, look up that grid's own
+        # cell-quantile estimate, then average the n_grids predictions.
+        preds_per_grid = np.empty((n, self.n_grids), dtype=np.float64)
+        for g in range(self.n_grids):
+            grid_g = self.grids_[:, g] if d == 1 else self.grids_[:, :, g]
+            assignments = voronoi_assign(x_q, grid_g)
+            preds_per_grid[:, g] = self.cell_quantiles_[assignments, g]
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            return np.nanmean(preds_per_grid, axis=1)

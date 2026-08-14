@@ -112,8 +112,11 @@ class TestEstimatorFit:
         )
         est.fit(X, Y)
         # Internal fitted attributes
-        assert hasattr(est, "grid_")
+        assert hasattr(est, "grids_")
         assert hasattr(est, "cell_quantiles_")
+        # one independent grid + cell-quantile table per bootstrap replicate
+        assert est.grids_.shape == (10, 5)
+        assert est.cell_quantiles_.shape == (10, 5)
 
     def test_fit_bivariate(self):
         from pinball.nonparametric.quantization._estimator import (
@@ -124,7 +127,7 @@ class TestEstimatorFit:
             N=15, n_grids=5, random_state=42
         )
         est.fit(X, Y)
-        assert est.grid_.ndim == 2  # (d, N) for d>1
+        assert est.grids_.ndim == 3  # (d, N, n_grids) for d>1
 
 
 # ============================================================
