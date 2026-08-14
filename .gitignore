@@ -46,3 +46,6 @@ venv/
 setup.py
 .travis.yml
 quantreg.pdf
+
+# ── Local scratch dev/eval (not part of the package) ─────────────
+local_testing/
