@@ -48,12 +48,24 @@ from __future__ import annotations
 import ctypes
 import pathlib
 import sys
+import warnings
 from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
 
 from pinball.linear.solvers.base import BaseSolver, SolverResult
+
+# POGS native status codes (csrc/pogs/include/pogs.h, enum PogsStatus)
+_POGS_SUCCESS = 0
+_POGS_STATUS_NAME = {
+    0: "POGS_SUCCESS",
+    1: "POGS_INFEASIBLE",
+    2: "POGS_UNBOUNDED",
+    3: "POGS_MAX_ITER",
+    4: "POGS_NAN_FOUND",
+    5: "POGS_ERROR",
+}
 
 # ──────────────────────────────────────────────────────────────────────
 # Lightweight stand-in for POGS FunctionObj / Function enums.
@@ -117,6 +129,65 @@ def _build_graph_form(
     g = [_FunctionObj(h=_kZero) for _ in range(n)]
 
     return f, g
+
+
+def _center_design_matrix(X: np.ndarray) -> tuple[np.ndarray, np.ndarray, int | None]:
+    """Mean-center every column of *X* except a detected constant column.
+
+    POGS's ADMM solver converges very slowly when a column sits far from
+    zero (e.g. a ``year`` column around 1985 alongside an intercept
+    column of 1s) -- Sinkhorn-Knopp equilibration (run internally by the
+    native solver) balances row/column *norms*, but that doesn't fix a
+    column being off-center, which is what actually drives ADMM's
+    convergence rate here. Centering leaves the fitted slopes unchanged
+    (quantile regression, like OLS, is translation-invariant given an
+    intercept term to absorb the shift); only that intercept's
+    coefficient needs correcting afterward, via
+    :func:`_uncenter_intercept`.
+
+    Returns
+    -------
+    X_centered, means, const_idx
+        ``means[j]`` is the subtracted mean for column *j* (0 for the
+        constant column, if any). ``const_idx`` is the index of the
+        detected constant *intercept* column, or ``None`` if *X* has none
+        (e.g. ``fit_intercept=False``) -- callers should skip centering
+        in that case, since there would be no column left to absorb the
+        compensating shift.
+
+        A constant column whose value is exactly 0 is never selected: a
+        real-world design matrix can contain a constant-zero feature
+        column too (e.g. a category that never occurs in a given data
+        slice, as in one-hot encodings), and that isn't the intercept --
+        picking it would divide by zero in :func:`_uncenter_intercept`.
+        The true intercept column added by ``QuantileRegressor`` is always
+        1s, so the first *nonzero*-constant column found is used.
+    """
+    means = np.zeros(X.shape[1])
+    const_idx = None
+    for j in range(X.shape[1]):
+        col = X[:, j]
+        if np.ptp(col) == 0.0:
+            if const_idx is None and col[0] != 0.0:
+                const_idx = j
+            continue
+        means[j] = col.mean()
+    return X - means, means, const_idx
+
+
+def _uncenter_intercept(
+    coef: np.ndarray, means: np.ndarray, const_idx: int, const_value: float
+) -> np.ndarray:
+    """Fold the column-centering shift back into the intercept coefficient.
+
+    If the centered fit is ``y = b0' + sum_j b_j * (X_j - mean_j)``, then in
+    the original (uncentered) scale that's
+    ``y = (b0' - sum_j b_j * mean_j) + sum_j b_j * X_j`` -- the correction
+    is *subtracted*, not added.
+    """
+    coef = coef.copy()
+    coef[const_idx] -= np.dot(coef, means) / const_value
+    return coef
 
 
 # ──────────────────────────────────────────────────────────────────────
@@ -371,12 +442,19 @@ class POGSSolver(BaseSolver):
         verbose = kwargs.get("verbose", self.verbose)
         adaptive_rho = kwargs.get("adaptive_rho", self.adaptive_rho)
 
+        # Center non-intercept columns -- see _center_design_matrix for why
+        # this matters for ADMM's convergence rate. Only safe to do when
+        # there's a constant column to absorb the compensating shift back
+        # into (i.e. fit_intercept=True upstream).
+        X_centered, means, const_idx = _center_design_matrix(X)
+        X_solve = X_centered if const_idx is not None else X
+
         # Build graph-form (pure, testable)
-        f, g = _build_graph_form(X, y, tau)
+        f, g = _build_graph_form(X_solve, y, tau)
 
         # Call native POGS (isolated, mockable)
         raw = _call_pogs(
-            X,
+            X_solve,
             f,
             g,
             abs_tol=abs_tol,
@@ -388,6 +466,19 @@ class POGSSolver(BaseSolver):
         )
 
         coef = raw["x"]
+        if const_idx is not None:
+            coef = _uncenter_intercept(coef, means, const_idx, X[0, const_idx])
+
+        status = raw.get("status", 0)
+        if status != _POGS_SUCCESS:
+            warnings.warn(
+                f"POGS did not reach the requested tolerance "
+                f"({_POGS_STATUS_NAME.get(status, status)} after "
+                f"{raw.get('iterations', 0)} iterations) — coefficients may be "
+                f"inaccurate. Consider raising max_iter.",
+                stacklevel=2,
+            )
+
         residuals = y - X @ coef
 
         return SolverResult(
@@ -395,7 +486,7 @@ class POGSSolver(BaseSolver):
             residuals=residuals,
             dual_solution=None,
             objective_value=raw.get("optval", 0.0),
-            status=raw.get("status", 0),
+            status=status,
             iterations=raw.get("iterations", 0),
             solver_info={"solver": "pogs"},
         )
