@@ -112,5 +112,9 @@ def _register_builtins() -> None:
     from pinball.linear.solvers.pogs import POGSSolver
     register_solver("pogs", POGSSolver)
 
+    from pinball.linear.solvers.conquer import ConquerSolver
+
+    register_solver("conquer", ConquerSolver)
+
 
 _register_builtins()
