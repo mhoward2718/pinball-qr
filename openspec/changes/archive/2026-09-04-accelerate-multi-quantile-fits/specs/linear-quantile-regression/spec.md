@@ -1,36 +1,4 @@
-## Purpose
-
-Provide linear (parametric) conditional quantile regression through an
-sklearn-compatible estimator, so that quantile models can be fit, predicted
-from, and scored using the same API and tooling as any other scikit-learn
-estimator.
-
-## Requirements
-
-### Requirement: sklearn-compatible estimator interface
-
-`QuantileRegressor` SHALL implement the scikit-learn estimator contract:
-constructor parameters stored unmodified on `self`, a `fit(X, y)` returning
-`self`, and `predict(X)` / `score(X, y)` available after fitting. It SHALL be
-usable inside scikit-learn pipelines and cross-validation utilities.
-
-#### Scenario: Fitting and predicting
-
-- **WHEN** a user calls `fit(X, y)` on a `QuantileRegressor` with valid data
-- **THEN** the estimator returns `self`, sets `coef_`, `intercept_`,
-  `residuals_`, `n_features_in_` and `n_iter_`, and `predict(X)` returns one
-  prediction per row of `X`
-
-#### Scenario: Used inside a scikit-learn pipeline
-
-- **WHEN** a `QuantileRegressor` is placed in a `Pipeline` and passed to
-  `cross_val_score`
-- **THEN** it clones, fits and scores without error
-
-#### Scenario: Predicting before fitting
-
-- **WHEN** `predict` is called on an unfitted estimator
-- **THEN** scikit-learn's `NotFittedError` is raised
+## MODIFIED Requirements
 
 ### Requirement: Single and multiple quantile levels
 
@@ -92,23 +60,7 @@ a random seed for solvers that sample, reach the solver.
   `solver_options`
 - **THEN** both fits produce identical coefficients
 
-### Requirement: Intercept handling
-
-The estimator SHALL add an intercept column automatically when
-`fit_intercept=True` and SHALL report `intercept_` as zero when
-`fit_intercept=False`, with `coef_` excluding the intercept in both cases.
-
-#### Scenario: Intercept fitted
-
-- **WHEN** `fit_intercept=True` and the data has a nonzero conditional median
-  at `X = 0`
-- **THEN** `intercept_` is nonzero and `coef_` has length equal to the number
-  of input features
-
-#### Scenario: Intercept suppressed
-
-- **WHEN** `fit_intercept=False`
-- **THEN** `intercept_` is `0.0` and predictions equal `X @ coef_`
+## ADDED Requirements
 
 ### Requirement: Degenerate sample weights are reported in terms of weights
 
