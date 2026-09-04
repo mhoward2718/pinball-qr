@@ -4,6 +4,7 @@ python_sources = [
   '__init__.py',
   'base.py',
   'br.py',
+  'conquer.py',
   'fnb.py',
   'lasso.py',
   'pfn.py',
