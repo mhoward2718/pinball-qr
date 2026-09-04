@@ -28,6 +28,9 @@ Features
   LASSO-penalised (``lasso``), and ADMM via POGS (``pogs``).
 * **Statistical inference** — IID, NID, and kernel standard errors, rank
   inversion confidence intervals, and bootstrap methods.
+* **Smoothed quantile regression** — convolution smoothing (``conquer``) with
+  five kernels, solved by gradient descent instead of linear programming, with
+  asymptotic and multiplier-bootstrap confidence intervals.
 * **Nonparametric quantile regression** — optimal quantization via
   Competitive Learning Vector Quantization (CLVQ).
 
@@ -58,3 +61,19 @@ This project builds on the work of several researchers and open-source projects:
     R package by **Isabelle Charlier**, **Davy Paindaveine**, and
     **Jérôme Saracco**. See Charlier, Paindaveine & Saracco (2015),
     *Estimation of Conditional Quantiles using Optimal Quantization*.
+
+**conquer** (R package) — algorithm only, no code
+    The ``conquer`` solver implements convolution-smoothed quantile regression
+    as described by **Xuming He**, **Xiaoou Pan**, **Kean Ming Tan** and
+    **Wen-Xin Zhou**, *Smoothed quantile regression with large-scale
+    inference*, Journal of Econometrics 232(2):367-388 (2023), building on
+    **Marcelo Fernandes**, **Emmanuel Guerre** and **Eduardo Horta**,
+    *Smoothing quantile regressions*, JBES 39(1):338-357 (2021).
+
+    The reference implementation is the
+    `conquer <https://cran.r-project.org/package=conquer>`_ R package by the
+    same authors. **No code was taken from it.** That package is GPL-3 and
+    pinball-qr is MIT, so its C++ sources were deliberately not consulted; this
+    is an independent implementation written from the published algorithm and
+    validated against the R package's *outputs*. We are grateful for the
+    method and for a reference to test against.
