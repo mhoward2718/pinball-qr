@@ -220,9 +220,15 @@ class QuantileRegressor(BaseQuantileEstimator):
         solver = get_solver(self.method)
         opts = self.solver_options or {}
 
-        results: list[SolverResult] = []
-        for t in taus:
-            results.append(solver.solve(X, y, float(t), **opts))
+        # Hand the whole grid to the solver.  The BaseSolver default just loops,
+        # so this is bit-identical to fitting one τ at a time for every solver
+        # that does not override it; preprocessing solvers use the grid to share
+        # one subsample and warm-start each τ from the previous fit.
+        results: list[SolverResult] = (
+            [solver.solve(X, y, float(taus[0]), **opts)]
+            if len(taus) == 1
+            else solver.solve_multi(X, y, taus, **opts)
+        )
 
         # Unpack
         if len(taus) == 1:

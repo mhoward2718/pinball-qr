@@ -96,6 +96,9 @@ class TestQuantileRegressorFit:
 
     def test_multi_quantile(self, data):
         X, y = data
+        # A multi-τ fit is dispatched through `solve_multi`, which returns one
+        # result per τ in input order.  (BaseSolver's default implementation of
+        # it just loops over `solve`, so real solvers need no extra code.)
         results = [
             SolverResult(
                 coefficients=np.array([5.0, 2.0, 4.0]),
@@ -115,9 +118,12 @@ class TestQuantileRegressorFit:
         ]
         mock_solver = MagicMock()
         mock_solver.solve.side_effect = list(results)
+        mock_solver.solve_multi.return_value = results
 
         with patch("pinball.linear._estimator.get_solver", return_value=mock_solver):
             model = QuantileRegressor(tau=[0.1, 0.5, 0.9]).fit(X, y)
+
+        mock_solver.solve_multi.assert_called_once()
 
         assert model.coef_.shape == (2, 3)
         assert model.intercept_.shape == (3,)
