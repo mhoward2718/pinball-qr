@@ -96,8 +96,7 @@ class TestQuantileRegressorFit:
 
     def test_multi_quantile(self, data):
         X, y = data
-        mock_solver = MagicMock()
-        mock_solver.solve.side_effect = [
+        results = [
             SolverResult(
                 coefficients=np.array([5.0, 2.0, 4.0]),
                 residuals=np.zeros(100),
@@ -114,6 +113,8 @@ class TestQuantileRegressorFit:
                 objective_value=0.0, status=0, iterations=1,
             ),
         ]
+        mock_solver = MagicMock()
+        mock_solver.solve.side_effect = list(results)
 
         with patch("pinball.linear._estimator.get_solver", return_value=mock_solver):
             model = QuantileRegressor(tau=[0.1, 0.5, 0.9]).fit(X, y)
@@ -121,6 +122,23 @@ class TestQuantileRegressorFit:
         assert model.coef_.shape == (2, 3)
         assert model.intercept_.shape == (3,)
         np.testing.assert_array_equal(model.intercept_, [5.0, 10.0, 15.0])
+
+    def test_all_zero_sample_weight_rejected(self, data):
+        """Zero-weight rows are filtered out, so all-zero weights leave an empty
+        design.  Report that in terms of the weights the caller passed, not as a
+        generic "not enough samples" from deep inside the solver.  (sklearn's
+        check_all_zero_sample_weights_error requires this wording too.)"""
+        X, y = data
+        with pytest.raises(ValueError, match="weight.*zero"):
+            QuantileRegressor().fit(X, y, sample_weight=np.zeros(len(y)))
+
+    def test_partial_zero_sample_weight_still_fits(self, data):
+        """Only the all-zero case is an error; dropping some rows is normal."""
+        X, y = data
+        weights = np.ones(len(y))
+        weights[:10] = 0.0
+        model = QuantileRegressor(method="fn").fit(X, y, sample_weight=weights)
+        assert np.all(np.isfinite(model.coef_))
 
     def test_sample_weight(self, data):
         X, y = data

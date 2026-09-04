@@ -187,6 +187,15 @@ class QuantileRegressor(BaseQuantileEstimator):
             # zero-weight rows contribute nothing to the pinball loss.
             # sklearn.linear_model.QuantileRegressor does the same.
             nz = sample_weight > 0
+            if not np.any(nz):
+                # Every row would be dropped below, leaving nothing to fit.  Say
+                # so here: otherwise the empty design reaches the solver and
+                # comes back as a generic "need at least 2 samples", which tells
+                # the caller nothing about the weights they passed.
+                raise ValueError(
+                    "All sample weights are zero; at least one observation must "
+                    "carry positive weight."
+                )
             if not np.all(nz):
                 X = X[nz]
                 y = y[nz]
