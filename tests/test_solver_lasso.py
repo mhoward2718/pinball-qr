@@ -143,6 +143,15 @@ class TestLassoSolverSolve:
         assert result.solver_info["lambda"] > 0
 
 
+def _has_native():
+    try:
+        from pinball._native import rqfnb  # noqa: F401
+        return True
+    except Exception:
+        return False
+
+
+@pytest.mark.skipif(not _has_native(), reason="Fortran extension not built")
 class TestLassoSolverSymmetricPenalty:
     """Real (non-mocked) solves checking the penalty is symmetric in the
     coefficient's *sign* at extreme tau -- not just at tau=0.5, where a

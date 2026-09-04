@@ -8,6 +8,14 @@ import pytest
 from pinball._estimator import QuantileRegressor
 from pinball.linear.solvers.base import SolverResult
 
+
+def _has_native():
+    try:
+        from pinball._native import rqfnb  # noqa: F401
+        return True
+    except Exception:
+        return False
+
 # ──────────────────────────────────────────────────────────────────────
 # Helper: mock solver that returns known coefficients
 # ──────────────────────────────────────────────────────────────────────
@@ -138,6 +146,7 @@ class TestQuantileRegressorFit:
         with pytest.raises(ValueError, match="weight.*zero"):
             QuantileRegressor().fit(X, y, sample_weight=np.zeros(len(y)))
 
+    @pytest.mark.skipif(not _has_native(), reason="Fortran extension not built")
     def test_partial_zero_sample_weight_still_fits(self, data):
         """Only the all-zero case is an error; dropping some rows is normal."""
         X, y = data

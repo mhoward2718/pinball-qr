@@ -143,6 +143,7 @@ class TestFNBReportsFailure:
             scale = np.abs(X).sum(axis=0).max()
             np.testing.assert_allclose(X.T @ a / scale, 0.0, atol=1e-9)
 
+    @pytest.mark.skipif(not _has_native(), reason="Fortran extension not built")
     def test_iteration_limit_warns_and_flags(self, data, monkeypatch):
         """Budget exhausted -> warn, and report it in status."""
         from pinball.linear.solvers import fnb as fnb_mod
@@ -160,6 +161,7 @@ class TestFNBReportsFailure:
         assert result.status == fnb_mod.STATUS_NOT_CONVERGED
         assert result.solver_info["converged"] is False
 
+    @pytest.mark.skipif(not _has_native(), reason="Fortran extension not built")
     def test_non_finite_coefficients_warn_and_flag(self, data, monkeypatch):
         """NaN coefficients with info = 0 must not pass as a normal result."""
         from pinball.linear.solvers import fnb as fnb_mod
