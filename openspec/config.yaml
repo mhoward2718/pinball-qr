@@ -1,0 +1,84 @@
+schema: spec-driven
+
+context: |
+  Project: pinball-qr — fast, accurate quantile regression for Python.
+
+  Tech stack
+    - Python >= 3.10, packaged with meson-python (build-backend = "mesonpy").
+    - Fortran 77 solvers exposed via f2py as the `pinball._native` extension.
+    - Runtime deps: numpy, scipy, scikit-learn. BLAS/LAPACK (OpenBLAS) required.
+    - Tests: pytest. Lint/format: ruff (line-length 100). Types: mypy.
+    - Docs: MkDocs Material + mkdocstrings.
+    - Distribution: prebuilt wheels via cibuildwheel (cp310-cp313; Linux
+      x86_64 manylinux_2_28, macOS arm64 + x86_64, Windows AMD64) plus an
+      sdist, published to PyPI by trusted publishing on `v*` tags. Users
+      `pip install pinball-qr` and need no Fortran/BLAS toolchain. Wheels
+      build on every push to main and every PR, and each wheel runs the test
+      suite as built — so the compiled path is genuinely exercised in CI.
+
+  Architecture
+    - `pinball/linear/` — parametric QR. `QuantileRegressor` is the
+      sklearn-compatible estimator; it delegates to a solver selected at
+      runtime from a registry (Strategy pattern).
+    - `pinball/linear/solvers/` — one module per solver, all implementing
+      `BaseSolver.solve() -> SolverResult`. Registered names: br, fn, fnb,
+      lasso, pfn, pogs. New solvers are ADDED via `register_solver`; existing
+      code must not change (Open/Closed).
+    - `pinball/nonparametric/quantization/` — CLVQ / Voronoi optimal-
+      quantization conditional quantile estimator.
+    - `pinball/linear/_inference.py`, `_bootstrap.py` — standard errors
+      (iid/nid/ker/rank) and bootstrap (xy, wild, mcmb).
+    - `fortran/` — rqbr.f, rqfn.f, rqfnb.f plus the original Ratfor sources
+      in `fortran/ratfor/`.
+
+  Provenance and the correctness bar
+    - The Fortran solvers are ported from Roger Koenker's R `quantreg`;
+      the quantization estimator from the R `QuantifQuantile` package;
+      the ADMM solver from POGS (Fougner). Attribution matters — preserve it.
+    - THE ACCEPTANCE BAR IS NUMERICAL PARITY WITH THE R REFERENCE. A change
+      to estimation behavior is not done until it is checked against R
+      output. Cite the R function you compared against in the spec/proposal.
+    - Treat `fortran/*.f` as generated-ish, ported code. Prefer changing the
+      Python layer. If a Fortran change is genuinely required, say so
+      explicitly in design.md, keep `fortran/ratfor/*.r` in sync, and
+      justify the divergence from quantreg.
+
+  Domain notes
+    - tau (quantile level) is in (0, 1); behavior at extreme tau is a
+      recurring source of bugs — every estimation spec should have a
+      scenario at extreme tau, not just tau=0.5. Several past bugs were
+      invisible at the median.
+    - Quantile regression is translation-invariant given an intercept.
+    - The pinball/check loss is non-differentiable; its gradient is
+      sign-only, which is what the LP solvers exploit.
+
+rules:
+  proposal:
+    - State which R reference function (quantreg / QuantifQuantile) the
+      behavior must match, or say explicitly that there is no R analogue.
+    - Include a "Non-goals" section.
+  specs:
+    - Every requirement touching estimation MUST include at least one
+      scenario at an extreme tau (e.g. 0.01 or 0.99), not only tau=0.5.
+    - Prefer scenarios stated as observable numerical behavior (coefficients,
+      residuals, warnings raised) over implementation detail.
+  design:
+    - Call out explicitly whether the change touches `fortran/`, `meson.build`,
+      `.f2py_f2cmap`, dependencies, or the `_native` extension — anything in
+      that set has to hold across all four cibuildwheel runners, so the wheel
+      matrix (not just local tests) is the evidence the change is safe.
+    - Note any change to the public API surface exported from
+      `pinball/__init__.py`.
+  tasks:
+    - Include a task for updating tests, and one for the R-parity check
+      when estimation behavior changes.
+
+operations:
+  apply:
+    guidance:
+      - Run `make lint` and `make test` before marking tasks complete.
+      - If the Fortran sources changed, the extension must be rebuilt
+        before tests are meaningful.
+  archive:
+    guidance:
+      - Confirm the R-parity check was actually run, not just planned.

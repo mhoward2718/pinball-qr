@@ -17,6 +17,7 @@ Design principles
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -130,6 +131,39 @@ class BaseSolver(ABC):
         Override this to add extra checks (e.g. BR requires ``n > p``).
         The default implementation does nothing.
         """
+
+    def solve_multi(
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
+        taus: Sequence[float],
+        **kwargs: Any,
+    ) -> list[SolverResult]:
+        """Fit several quantiles, returning one result per τ **in input order**.
+
+        The default simply loops, so a solver that gains nothing from seeing the
+        whole grid at once needs no code and behaves exactly as before.  Solvers
+        that *can* exploit the grid — preprocessing solvers reuse one subsample
+        and carry residuals from one τ to the next — override this and advertise
+        it via :meth:`supports_multiple_quantiles`.
+
+        Every τ is validated up front, so an invalid level is rejected wherever
+        it sits in the grid rather than after some of the work has been done.
+        """
+        taus = [float(t) for t in taus]
+        for tau in taus:
+            self._validate_and_prepare(X, y, tau)
+        return self._solve_multi_impl(X, y, taus, **kwargs)
+
+    def _solve_multi_impl(
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
+        taus: Sequence[float],
+        **kwargs: Any,
+    ) -> list[SolverResult]:
+        """Per-τ fallback. Override to exploit the grid."""
+        return [self.solve(X, y, tau, **kwargs) for tau in taus]
 
     @staticmethod
     def supports_multiple_quantiles() -> bool:

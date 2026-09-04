@@ -187,6 +187,15 @@ class QuantileRegressor(BaseQuantileEstimator):
             # zero-weight rows contribute nothing to the pinball loss.
             # sklearn.linear_model.QuantileRegressor does the same.
             nz = sample_weight > 0
+            if not np.any(nz):
+                # Every row would be dropped below, leaving nothing to fit.  Say
+                # so here: otherwise the empty design reaches the solver and
+                # comes back as a generic "need at least 2 samples", which tells
+                # the caller nothing about the weights they passed.
+                raise ValueError(
+                    "All sample weights are zero; at least one observation must "
+                    "carry positive weight."
+                )
             if not np.all(nz):
                 X = X[nz]
                 y = y[nz]
@@ -211,9 +220,15 @@ class QuantileRegressor(BaseQuantileEstimator):
         solver = get_solver(self.method)
         opts = self.solver_options or {}
 
-        results: list[SolverResult] = []
-        for t in taus:
-            results.append(solver.solve(X, y, float(t), **opts))
+        # Hand the whole grid to the solver.  The BaseSolver default just loops,
+        # so this is bit-identical to fitting one τ at a time for every solver
+        # that does not override it; preprocessing solvers use the grid to share
+        # one subsample and warm-start each τ from the previous fit.
+        results: list[SolverResult] = (
+            [solver.solve(X, y, float(taus[0]), **opts)]
+            if len(taus) == 1
+            else solver.solve_multi(X, y, taus, **opts)
+        )
 
         # Unpack
         if len(taus) == 1:
