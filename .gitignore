@@ -49,3 +49,6 @@ quantreg.pdf
 
 # ── Local scratch dev/eval (not part of the package) ─────────────
 local_testing/
+
+# ── Machine-local agent settings (paths are specific to one checkout) ──
+.claude/settings.local.json
