@@ -19,6 +19,20 @@ import numpy as np
 
 from pinball.linear.solvers.base import BaseSolver, SolverResult
 
+#: Mirrors ``parameter( maxit = 500 )`` in ``lpfnb`` (``fortran/rqfnb.f``).  The
+#: Fortran does not export it, so it has to be duplicated here; keep in sync.
+_LPFNB_MAXIT = 500
+
+#: ``SolverResult.status`` value meaning "the iteration budget ran out before the
+#: duality gap met ``eps``".  Deliberately out of band: LAPACK's ``dposv`` (the
+#: only other source of ``status`` here) reports 0, or a leading-minor index in
+#: ``1..p``, so no collision is possible.
+STATUS_NOT_CONVERGED = -99
+
+#: ``SolverResult.status`` value meaning "the routine returned non-finite
+#: coefficients".  Same out-of-band rationale as :data:`STATUS_NOT_CONVERGED`.
+STATUS_NOT_FINITE = -98
+
 
 class FNBSolver(BaseSolver):
     """Frisch-Newton interior-point solver (bounded variables formulation).
@@ -35,6 +49,12 @@ class FNBSolver(BaseSolver):
     def __init__(self, beta: float = 0.99995, eps: float = 1e-6) -> None:
         if not (0 < beta < 1):
             raise ValueError(f"beta must be in (0, 1), got {beta}.")
+        # A non-positive eps makes lpfnb's `gap > eps` loop test unsatisfiable;
+        # the iteration then runs on until the gap goes NaN, at which point the
+        # comparison is false and the routine returns NaN coefficients with
+        # info = 0.  Reject it here rather than let that happen silently.
+        if not eps > 0:
+            raise ValueError(f"eps must be positive, got {eps}.")
         self.beta = beta
         self.eps = eps
 
@@ -101,7 +121,38 @@ class FNBSolver(BaseSolver):
                 f"rqfnb info = {info_val}: possibly singular design.", stacklevel=2
             )
 
+        n_iter = int(nit_out[0]) if hasattr(nit_out, "__len__") else 0
+
+        # `lpfnb` leaves its loop when the duality gap is small OR the iteration
+        # budget runs out, and in the latter case it does *not* touch `info` —
+        # `info` is only ever set by stepy's dposv.  Without the check below an
+        # unconverged (i.e. wrong) fit is returned looking exactly like a good
+        # one.  The iteration count is the only evidence available here.
+        converged = n_iter < _LPFNB_MAXIT
+        if converged:
+            status = info_val
+        else:
+            status = info_val if info_val != 0 else STATUS_NOT_CONVERGED
+            warnings.warn(
+                f"rqfnb hit its iteration limit ({_LPFNB_MAXIT}) without reaching "
+                f"eps={eps:g}; the returned coefficients may not be optimal. "
+                "Consider loosening eps or rescaling the design.",
+                stacklevel=2,
+            )
+
         coefficients = -wp_out[:, 0]
+
+        # Defence in depth: lpfnb can leave its loop with a NaN gap (the test
+        # `gap > eps` is false for NaN) and hand back NaN coefficients while
+        # info is still 0.  Never return that quietly.
+        if not np.all(np.isfinite(coefficients)):
+            status = STATUS_NOT_FINITE
+            warnings.warn(
+                "rqfnb returned non-finite coefficients; the fit failed. This "
+                "usually indicates a badly scaled or rank-deficient design.",
+                stacklevel=2,
+            )
+
         residuals = y - X @ coefficients
 
         # Objective: weighted pinball loss
@@ -109,12 +160,18 @@ class FNBSolver(BaseSolver):
         neg_resid = np.maximum(-residuals, 0.0)
         obj = tau * np.sum(pos_resid) + (1.0 - tau) * np.sum(neg_resid)
 
+        # wn[:, 2] holds the optimal primal weights x in [0, 1] of the bounded
+        # dual LP.  Shifting by (1 - tau) gives the quantile-regression dual
+        # a in [tau - 1, tau] satisfying X' a = 0 — i.e. a certificate of
+        # optimality that callers can check without re-solving.
+        dual = wn_out[:, 2] - (1.0 - tau)
+
         return SolverResult(
             coefficients=coefficients,
             residuals=residuals,
-            dual_solution=None,
+            dual_solution=dual,
             objective_value=obj,
-            status=info_val,
-            iterations=int(nit_out[0]) if hasattr(nit_out, "__len__") else 0,
-            solver_info={"nit": nit_out},
+            status=status,
+            iterations=n_iter,
+            solver_info={"nit": nit_out, "converged": converged},
         )
